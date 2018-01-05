@@ -18,31 +18,59 @@ class Canvas extends PureComponent {
     autoBind(this);
   }
   test(){
+    // this.saveDrawing()
+    this.getDrawing()
     // this.context.scale(2, 2) 
     // this.setState({
     //   pixelSize: 2* this.state.pixelSize,
     //   width: 2 * this.state.width
     // })
-    const d = this.context.getImageData(0,0,this.state.width,this.state.width).data
-    // console.log(d)
-    var r = enc.clampedArrToNumArr(d)
-    console.log(enc.leftRunWithLines(r))
-    console.log('done', r.length, enc.leftRun(r).length, enc.leftRun(enc.rotate(r)).length,  enc.leftRunWithLines(r).length)
+  }
+  test2(){
+        this.saveDrawing()
+
   }
   componentDidMount(){
     this.context = this.canvas.getContext("2d");
     this.setColor('rgba(0,0,255,255)')
 
   }
-// Add drawing listener //
 
-// Add color change listener //
-// var colorCount = 0;
-// while (colorCount < colors) {
-//   colorCount++;
-//   var colorBlock = document.getElementsByClassName('color' + colorCount);
-//   colorBlock[0].addEventListener("click", getColor, false);
-// }
+  saveDrawing(options){
+    
+
+    const {width} = this.state
+    const {inkTokenInstance, currentUser} = this.props
+    var method
+
+    // switch (options.method) {
+    //   case 'string':
+        
+    //     break;
+    
+    //   default:
+    //     method = 
+    //     break;
+    // }
+    
+     const d = this.context.getImageData(0,0,width, width).data
+    // console.log(d)
+    var r = enc.clampedArrToNumArr(d)
+    console.log('done', r.length, enc.leftRun(r).length, enc.leftRun(enc.rotate(r)).length,  enc.leftRunWithLines(r).length)
+     inkTokenInstance.drawBytes('0x' +  enc.leftRun(r), {from: currentUser})
+     .then( async (result) => {
+      // Get the value from the contract to prove it worked.
+      this.getDrawing()
+    })
+  }
+
+  getDrawing(){
+    const {inkTokenInstance, currentUser} = this.props
+
+    inkTokenInstance.getCanvasBytes.call({from: currentUser}).then((result)=>{
+      console.log('?current canvas:', result)
+    })
+  }
 
  getPixelSelected(e) {
   var rect = this.canvas.getBoundingClientRect(),
@@ -65,9 +93,6 @@ setColor(color){
   console.log(color)
   this.context.fillStyle = color
 }
-
-
-  
 
   draw(e){
     const pixel = this.getPixelSelected(e);
@@ -101,6 +126,7 @@ setColor(color){
       <canvas id='can' onClick={this.draw} ref={(canvas)=> this.canvas = canvas } width={this.state.width} height={this.state.width}>
       </canvas>
       <div onClick={this.test}>test</div>
+      <div onClick={this.test2}>test2</div>
       </div>
     );
   }

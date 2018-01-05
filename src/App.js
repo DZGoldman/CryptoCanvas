@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
+import InkTokenContract from '../build/contracts/InkToken.json'
+
 import getWeb3 from './utils/getWeb3'
 import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
 import Canvas from './components/Canvas.js'
+import autoBind from 'react-autobind';
 
 class App extends Component {
   constructor(props) {
@@ -13,8 +16,11 @@ class App extends Component {
 
     this.state = {
       storageValue: 0,
-      web3: null
+      web3: null,
+      inkToken: null
     }
+    autoBind(this);
+
   }
 
   componentWillMount() {
@@ -30,6 +36,7 @@ class App extends Component {
 
       // Instantiate contract once web3 provided.
       // this.instantiateContract()
+      this.instantiateInkToken()
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -37,7 +44,6 @@ class App extends Component {
   }
 
   instantiateContract() {
-    console.log('asldfjadsfhkajsdhh')
     /*
      * SMART CONTRACT EXAMPLE
      *
@@ -56,28 +62,40 @@ class App extends Component {
     this.state.web3.eth.getAccounts((error, accounts) => {
       console.log(accounts)
       simpleStorage.deployed().then((instance) => {
-        console.log('//?????')
+        console.log('Deployed', instance)
         simpleStorageInstance = instance
-
         // Stores a given value, 5 by default.
         return simpleStorageInstance.set(5, {from: accounts[0]})
       }).then((result) => {
-        console.log('asdf?')
-        console.log(result)
+        console.log('result1',result)
         // Get the value from the contract to prove it worked.
         return simpleStorageInstance.get.call()
       }).then((result) => {
+        console.log('result2',result)
+        
         // Update state with the result.
-        console.log('?')
-        console.log('result', result)
         return this.setState({ storageValue: result.c[0] })
       })
+    })
+  }
+
+  instantiateInkToken(){
+    const contract = require('truffle-contract')
+    const inkToken = contract(InkTokenContract)
+    inkToken.setProvider(this.state.web3.currentProvider)
+
+    this.state.web3.eth.getAccounts( async (error, accounts) => {
+      const instance = await inkToken.deployed()
+      this.setState({inkTokenInstance: instance, currentUser: accounts[0]})
     })
   }
 
   render() {
     return (
       <div className="App">
+      <div onClick={this.instantiateContract}>
+        test contract
+        </div>
         <nav className="navbar pure-menu pure-menu-horizontal">
             <a href="#" className="pure-menu-heading pure-menu-link">Truffle Box</a>
         </nav>
@@ -90,7 +108,10 @@ class App extends Component {
               <p>The stored value is: {this.state.storageValue}</p>
             </div>
           </div>
-          <Canvas/>
+          <Canvas
+            inkTokenInstance={this.state.inkTokenInstance}
+            currentUser={this.state.currentUser}
+          />
         </main>
       </div>
     );

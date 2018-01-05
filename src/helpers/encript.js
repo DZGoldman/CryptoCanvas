@@ -81,5 +81,5 @@ export const leftRun=  (numStr, delin='a') => {
     }
     return finalStr
 }
-console.log('????')
-console.log(leftRunWithLines('111111111'))
+// console.log('????')
+// console.log(leftRunWithLines('111111111'))
