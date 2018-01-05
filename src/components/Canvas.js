@@ -13,13 +13,18 @@ class Canvas extends PureComponent {
 
 
     this.state.pixelSize = 1;
-    this.state.width = 25;
+    this.state.width = 3;
     this.height = this.state.width ;
     autoBind(this);
   }
   test(){
     // this.saveDrawing()
-    this.getDrawing()
+    // this.getDrawing()
+    // const d = this.context.getImageData(0,0,this.state.width, this.state.width).data
+    // console.log(d)
+    // var r = enc.clampedArrToNumArr(d)
+    // console.log(r)
+    this.applyDrawing('222222222')
     // this.context.scale(2, 2) 
     // this.setState({
     //   pixelSize: 2* this.state.pixelSize,
@@ -28,6 +33,12 @@ class Canvas extends PureComponent {
   }
   test2(){
         this.saveDrawing()
+
+  }
+
+  zoomIn(){
+    const d = this.context.getImageData(0,0,this.state.width, this.state.width).data
+    const numArray = enc.clampedArrToNumArr(d)
 
   }
   componentDidMount(){
@@ -96,15 +107,32 @@ setColor(color){
 
   draw(e){
     const pixel = this.getPixelSelected(e);
-    this.getColor()
+    // this.getColor()
     this.context.fillRect(pixel['x'], pixel['y'], this.state.pixelSize, this.state.pixelSize);
 
     // for( var i = 0; i < 5000; i++){
     //   this.context.fillRect(i, i, this.state.pixelSize, this.state.pixelSize);
-    // this.canvas.width = 500
     // }
   }
 
+  applyDrawing(numStr){
+    // TODO: start at root coordinate, width is width of drawing instead of whole canvas
+    const width = Math.sqrt(numStr.length);
+    for (var i = 0; i < width; i++){
+      for (var j=0; j<width; j++){
+        const currentColorNum = numStr[i + (width * j)];
+        const currentColor = `rgba(${enc.numToRbga[currentColorNum] })`
+
+        if (this.getColor() != currentColor){
+          this.setColor(currentColor)
+        } 
+
+        this.context.fillRect(i, j, this.state.pixelSize, this.state.pixelSize);
+
+
+      }
+    }
+  }
   renderPallate(){
     return <div id='palatte-container'>
      {enc.numToRbga.map((c, i)=>{

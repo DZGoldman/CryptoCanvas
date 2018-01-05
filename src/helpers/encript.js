@@ -22,6 +22,8 @@ export const clampedArrToNumArr = (campedArr) => {
     return numString
 }
 
+
+
 export const leftRunWithLines =  (numStr, delin='b') =>{
     const stringsArray = [];
     const width = Math.sqrt(numStr.length);
@@ -81,5 +83,34 @@ export const leftRun=  (numStr, delin='a') => {
     }
     return finalStr
 }
-// console.log('????')
-// console.log(leftRunWithLines('111111111'))
+
+export const leftRunDecrypt = (encryptedStr, delin='a') => {
+    var decryptedString = '',
+    currentChar='',
+    nextDelinIndex,
+    newRun
+    console.log('???')
+    for(var i = 0; i < encryptedStr.length; i++) {
+        currentChar = encryptedStr[i];
+        if (currentChar == delin) {
+            nextDelinIndex = encryptedStr.slice(i+1).indexOf(delin)
+            console.log(i, nextDelinIndex)
+            // TODO: ensure not -1
+            if (nextDelinIndex == -1){
+                console.warn('ERROR')
+                return false
+            }
+            newRun = encryptedStr.slice(i+2, i+1+nextDelinIndex )
+            decryptedString += encryptedStr[i+1].repeat( newRun )
+            console.log(decryptedString)
+            // return
+            i = nextDelinIndex
+        } else {
+            decryptedString += currentChar
+        }
+
+    } 
+        return decryptedString
+}
+
+// console.log( leftRunDecrypt(l))
