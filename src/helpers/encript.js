@@ -84,33 +84,45 @@ export const leftRun=  (numStr, delin='a') => {
     return finalStr
 }
 
+
+export  const leftRunSequeceToFull = (seq)=> {
+    return seq[0].repeat(seq.slice(1))
+}
+
 export const leftRunDecrypt = (encryptedStr, delin='a') => {
     var decryptedString = '',
     currentChar='',
+    len = encryptedStr.length,
     nextDelinIndex,
     newRun
-    console.log('???')
-    for(var i = 0; i < encryptedStr.length; i++) {
+    for(var i = 0; i < len; i++) {
         currentChar = encryptedStr[i];
         if (currentChar == delin) {
-            nextDelinIndex = encryptedStr.slice(i+1).indexOf(delin)
-            console.log(i, nextDelinIndex)
-            // TODO: ensure not -1
-            if (nextDelinIndex == -1){
-                console.warn('ERROR')
-                return false
+            nextDelinIndex= i+1;
+            while (nextDelinIndex < len && encryptedStr[nextDelinIndex] != delin){
+                nextDelinIndex ++
             }
-            newRun = encryptedStr.slice(i+2, i+1+nextDelinIndex )
-            decryptedString += encryptedStr[i+1].repeat( newRun )
-            console.log(decryptedString)
-            // return
+            decryptedString+= leftRunSequeceToFull( encryptedStr.slice(i+1, nextDelinIndex))
             i = nextDelinIndex
+
         } else {
             decryptedString += currentChar
         }
 
     } 
         return decryptedString
+}
+
+export const zoomVertical = (numString, scale) => {
+    const height = Math.sqrt(numString.length);
+    var newArray = [],
+    currentHeight;
+    for (var i = 0; i < numString.length; i+= scale*height) {
+        currentHeight = Math.floor(i);
+        newArray.push( numString.slice(currentHeight, currentHeight + height) )
+        console.log(newArray)
+    }
+    return newArray.join('')
 }
 
 // console.log( leftRunDecrypt(l))
