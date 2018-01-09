@@ -40,6 +40,28 @@ test('rotate tests', () => {
   expect(  enc.rotate('123456789') ) .toBe( '147258369' )
 });
 
+test('back rotate tests', () => {
+  expect(  enc.backRotate('') ) .toBe( '' )
+  expect(  enc.backRotate('147258369') ) .toBe( '123456789' )
+
+});
+
+
+test('rotate ole in & out tests', () => {
+  const testHelper = (str) => {
+    if (Math.random < 0.5){
+
+      expect(str).toBe(enc.backRotate(enc.rotate(str)))
+    } else {
+      expect(str).toBe(enc.rotate(enc.backRotate(str)))
+
+    }
+  } 
+  for (var i = 0; i < 25; i++) {
+    testHelper(randomNumStr(i*i))
+  }
+});
+
 
   test('encript/decript tests', ()=>{
     const testHelper = (str) => {

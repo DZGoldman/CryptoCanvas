@@ -8,12 +8,11 @@ class Canvas extends PureComponent {
     super(props)
     
     this.state = {
-      test: ''
+      test: '',
+      pixelSize: 5,
+      width: 5000,
     }
 
-
-    this.state.pixelSize = 1;
-    this.state.width = 3;
     this.height = this.state.width ;
     autoBind(this);
   }
@@ -24,12 +23,13 @@ class Canvas extends PureComponent {
     // console.log(d)
     // var r = enc.clampedArrToNumArr(d)
     // console.log(r)
-    this.applyDrawing('222222222')
+    // this.applyDrawing('222222222')
     // this.context.scale(2, 2) 
     // this.setState({
     //   pixelSize: 2* this.state.pixelSize,
     //   width: 2 * this.state.width
     // })
+    this.zoomIn()
   }
   test2(){
         this.saveDrawing()
@@ -37,8 +37,16 @@ class Canvas extends PureComponent {
   }
 
   zoomIn(){
+    const {pixelSize, width} = this.state
     const d = this.context.getImageData(0,0,this.state.width, this.state.width).data
     const numArray = enc.clampedArrToNumArr(d)
+
+    const zoomedStr = enc.zoom(numArray, 2)
+    this.setState({
+      // pixelSize: pixelSize * 2,
+      width: width * 2
+    })
+    setTimeout(()=>{this.applyDrawing(zoomedStr), 2000});
 
   }
   componentDidMount(){
@@ -101,7 +109,7 @@ class Canvas extends PureComponent {
 }
 
 setColor(color){
-  console.log(color)
+  // console.log(color)
   this.context.fillStyle = color
 }
 

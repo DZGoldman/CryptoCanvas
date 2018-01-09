@@ -63,6 +63,18 @@ export const rotate = (numStr) => {
     return newString
 }
 
+export const backRotate = (numStr) =>{
+    const width = Math.sqrt(numStr.length);
+    var newStr = '';
+    for (var i = 0; i < width; i ++ ){ 
+        for (var j = 0; j < width; j++ ){ 
+            newStr += numStr[width * j  + i] 
+        }
+
+    }
+    return newStr
+}
+
 export const leftRun=  (numStr, delin='a') => {
     var currentCount = 1, currentChar = '', finalStr='';
 
