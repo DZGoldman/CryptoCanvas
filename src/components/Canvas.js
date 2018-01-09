@@ -9,8 +9,8 @@ class Canvas extends PureComponent {
     
     this.state = {
       test: '',
-      pixelSize: 5,
-      width: 5000,
+      pixelSize: 1,
+      width: 50,
     }
 
     this.height = this.state.width ;
@@ -40,11 +40,11 @@ class Canvas extends PureComponent {
     const {pixelSize, width} = this.state
     const d = this.context.getImageData(0,0,this.state.width, this.state.width).data
     const numArray = enc.clampedArrToNumArr(d)
-
-    const zoomedStr = enc.zoom(numArray, 2)
+    var scale = 3
+    const zoomedStr = enc.zoom(numArray, 3)
     this.setState({
-      // pixelSize: pixelSize * 2,
-      width: width * 2
+      pixelSize: 3  * pixelSize,
+      width: width * 3
     })
     setTimeout(()=>{this.applyDrawing(zoomedStr), 2000});
 
@@ -163,6 +163,7 @@ setColor(color){
       </canvas>
       <div onClick={this.test}>test</div>
       <div onClick={this.test2}>test2</div>
+      <div>size{this.state.pixelSize}</div>
       </div>
     );
   }
