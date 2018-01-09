@@ -1,3 +1,4 @@
+import {addFractions, multiplyFractions} from './mathMethods'
 
 
 export const numToRbga = [ '0,0,0,0', // blank
@@ -15,13 +16,11 @@ export const clampedArrToNumArr = (campedArr) => {
     var segment;
     var numString = ''
     for (var i = 0; i < campedArr.length; i+= 4){
-        segment = String(campedArr.slice(i, i +4))
-        // console.log(segment)
+        segment = campedArr.slice(i, i +4)
         numString += rgbaToNum[segment]
     }
     return numString
 }
-
 
 
 export const leftRunWithLines =  (numStr, delin='b') =>{
@@ -113,16 +112,39 @@ export const leftRunDecrypt = (encryptedStr, delin='a') => {
         return decryptedString
 }
 
-export const zoomVertical = (numString, scale) => {
-    const height = Math.sqrt(numString.length);
-    var newArray = [],
-    currentHeight;
-    for (var i = 0; i < numString.length; i+= scale*height) {
-        currentHeight = Math.floor(i);
-        newArray.push( numString.slice(currentHeight, currentHeight + height) )
-        console.log(newArray)
+export const zoomVertical = (numString, scale=1 ) => {
+   const stringRows = [];
+   const height = Math.sqrt(numString.length);
+   var newStr='',
+   segment;
+   for (var i = 0; i < numString.length; i+= height) {
+        segment = numString.slice(i, i + height)
+        stringRows.push(segment)
     }
-    return newArray.join('')
+    for (var i = 0; i < stringRows.length;   i=   addFractions(i , 1/scale)) {
+        newStr += stringRows[Math.floor(i )]
+    }
+    return newStr
+
 }
 
-// console.log( leftRunDecrypt(l))
+export const zoomHorrizontal = (numStr, scale) => {
+    var currentRunChar=numStr[0],
+    currentRunCount=1,
+    newStr='';
+    numStr.split('').forEach((char, i)=>{
+        if (char == numStr[i+1]){
+            currentRunCount++
+        } else {
+            newStr += char.repeat( multiplyFractions(currentRunCount ,scale))
+            currentRunCount = 1
+        }
+    })
+    return newStr
+}
+
+export const zoom = (numStr, scale) => {
+    return zoomHorrizontal (
+        zoomVertical(numStr, scale), scale
+    )
+}
