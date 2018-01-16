@@ -73,6 +73,21 @@ test('rotate ole in & out tests', () => {
   })
 
 
+  test('encript/decript tests', ()=>{
+    expect(enc.encryptMain('')).toBe('1')
+    expect(enc.decryptMain('')).toBe('')
+    expect(enc.decryptMain('1')).toBe('')
+
+    const testHelper = (str) => {
+      expect(str).toBe(enc.decryptMain(enc.encryptMain(str)))
+    } 
+    for(var i = 0; i < 100; i++){
+      testHelper(randomNumStr(100))
+    }
+  })
+
+
+
   test('zoom vert tests', () => {
     expect (enc.zoomVertical('',2)).toBe('')
     expect (enc.zoomVertical('1111',1/2)).toBe('11')

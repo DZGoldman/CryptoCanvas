@@ -160,3 +160,29 @@ export const zoom = (numStr, scale) => {
         zoomVertical(numStr, scale), scale
     )
 }
+
+
+export const encryptMain = (numStr) => {
+    const leftRan = leftRun(numStr);
+    const leftRanRotated = leftRun(rotate(numStr))
+
+    if ( leftRanRotated.length < leftRan.length ){
+        return '2' + leftRanRotated
+    } else {
+        return '1' + leftRan
+    }
+}
+
+export const decryptMain = (numStr) => {
+    if (!numStr.length) return ''
+    const data = numStr.slice(1)
+    switch (numStr[0]) {
+        case '2':
+            return backRotate(leftRunDecrypt(data))
+        case '1':
+            return leftRunDecrypt(data)
+        default:
+            return false;
+    }
+}
+

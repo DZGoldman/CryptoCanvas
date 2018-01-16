@@ -9,8 +9,8 @@ class Canvas extends PureComponent {
     
     this.state = {
       test: '',
-      pixelSize: 1,
-      width: 50,
+      pixelSize: 10,
+      width: 100,
     }
 
     this.height = this.state.width ;
@@ -18,7 +18,13 @@ class Canvas extends PureComponent {
   }
   test(){
     // this.saveDrawing()
-    // this.getDrawing()
+    this.getDrawing((result)=>{
+      console.log(typeof result)
+      console.log('????', result.slice(2))
+      var x = enc.decryptMain(result.slice(2))
+      // x = enc.zoom(x, this.state.pixelSize)
+      this.applyDrawing(x)
+    })
     // const d = this.context.getImageData(0,0,this.state.width, this.state.width).data
     // console.log(d)
     // var r = enc.clampedArrToNumArr(d)
@@ -29,7 +35,7 @@ class Canvas extends PureComponent {
     //   pixelSize: 2* this.state.pixelSize,
     //   width: 2 * this.state.width
     // })
-    this.zoomIn()
+    // this.zoomIn()
   }
   test2(){
         this.saveDrawing()
@@ -58,7 +64,7 @@ class Canvas extends PureComponent {
   saveDrawing(options){
     
 
-    const {width} = this.state
+    const {width, pixelSize} = this.state
     const {inkTokenInstance, currentUser} = this.props
     var method
 
@@ -75,19 +81,21 @@ class Canvas extends PureComponent {
      const d = this.context.getImageData(0,0,width, width).data
     // console.log(d)
     var r = enc.clampedArrToNumArr(d)
-    console.log('done', r.length, enc.leftRun(r).length, enc.leftRun(enc.rotate(r)).length,  enc.leftRunWithLines(r).length)
-     inkTokenInstance.drawBytes('0x' +  enc.leftRun(r), {from: currentUser})
+    // r = enc.zoom(r, 1/pixelSize)
+    const encryptedData = enc.encryptMain(r)
+    inkTokenInstance.drawBytes('0x' + encryptedData , {from: currentUser})
      .then( async (result) => {
       // Get the value from the contract to prove it worked.
       this.getDrawing()
     })
   }
 
-  getDrawing(){
+  getDrawing(next){
     const {inkTokenInstance, currentUser} = this.props
 
     inkTokenInstance.getCanvasBytes.call({from: currentUser}).then((result)=>{
       console.log('?current canvas:', result)
+      next && next(result)
     })
   }
 
@@ -124,6 +132,7 @@ setColor(color){
   }
 
   applyDrawing(numStr){
+    console.log('??', numStr)
     // TODO: start at root coordinate, width is width of drawing instead of whole canvas
     const width = Math.sqrt(numStr.length);
     for (var i = 0; i < width; i++){
