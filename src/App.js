@@ -7,7 +7,7 @@ import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
-import Canvas from './components/Canvas.js'
+import CanvasContainer from './components/CanvasContainer.js'
 import autoBind from 'react-autobind';
 
 class App extends Component {
@@ -108,7 +108,7 @@ class App extends Component {
               <p>The stored value is: {this.state.storageValue}</p>
             </div>
           </div>
-          <Canvas
+          <CanvasContainer
             inkTokenInstance={this.state.inkTokenInstance}
             currentUser={this.state.currentUser}
           />

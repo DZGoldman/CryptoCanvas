@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react'
 import autoBind from 'react-autobind';
 import * as enc from '../helpers/encript'
 
-class Canvas extends PureComponent {
+class CanvasContainer extends PureComponent {
   constructor(props) {
     super(props)
     
@@ -178,4 +178,4 @@ setColor(color){
   }
 }
 
-export default Canvas
+export default CanvasContainer
