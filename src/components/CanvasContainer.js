@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react'
 // import $ from "jquery";
 import autoBind from 'react-autobind';
 import * as enc from '../helpers/encript'
+import Canvas from './Canvas'
 
 class CanvasContainer extends PureComponent {
   constructor(props) {
