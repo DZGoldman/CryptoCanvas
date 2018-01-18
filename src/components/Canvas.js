@@ -36,15 +36,29 @@ handleMouseDown(e) {
         
      return pixel;
 }
+	// Cell Paint Logic
+	paint(col, row, left, top, width, height, zoom) {
+        const {context, newCellHash} = this
+        context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
+        		// context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
+
+		var newlyPaintedCell = newCellHash[`${row},${col}`]
+		if (newlyPaintedCell ){
+			context.fillStyle = newlyPaintedCell
+		}
+		context.fillRect(left, top, width, height);
+		
+	};
 
   componentDidMount(){
-    var {contentWidth, cellWidth, newCellHash, content, container} = this
+    var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
     // Settings
 	var contentHeight = 1000;
 	var cellHeight = 5;
 	
 	content.addEventListener("mousedown", this.handleMouseDown, false); 
-	var context = content.getContext('2d');
+    var context = content.getContext('2d');
+    this.context = context
 	var tiling = new Tiling;
 	
 
@@ -65,27 +79,6 @@ handleMouseDown(e) {
 		tiling.render(left, top, zoom, paint);
 	};
 	
-	// Cell Paint Logic
-	var paint = function(col, row, left, top, width, height, zoom) {
-
-        context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
-        		// context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
-
-		var c = newCellHash[`${row},${col}`]
-		if (c ){
-			context.fillStyle = newCellHash[`${row},${col}`]
-		}
-		context.fillRect(left, top, width, height);
-		
-		// context.fillStyle = "black";
-		// context.font = (14 * zoom).toFixed(2) + 'px "Helvetica Neue", Helvetica, Arial, sans-serif';
-		
-		// Pretty primitive text positioning :)
-		// context.fillText(row + "," + col, left + (6 * zoom), top + (18 * zoom));
-		
-	};
-	
-
 
 
 
