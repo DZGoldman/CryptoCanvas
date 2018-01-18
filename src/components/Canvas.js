@@ -40,7 +40,7 @@ handleMouseDown(e) {
 	paint(col, row, left, top, width, height, zoom) {
         const {context, newCellHash} = this
         context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
-        		// context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
+        // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
 
 		var newlyPaintedCell = newCellHash[`${row},${col}`]
 		if (newlyPaintedCell ){
@@ -48,46 +48,47 @@ handleMouseDown(e) {
 		}
 		context.fillRect(left, top, width, height);
 		
-	};
+    };
+    
+    renderTiles (left, top, zoom) {
+        var {contentWidth, cellWidth, newCellHash, content, container, clientWidth, context, paint, tiling} = this
+        if (!clientWidth){
+            clientWidth = 0
+        }
+		// Sync current dimensions with canvas
+		content.width = clientWidth;
+        content.height = clientWidth;
+        		
+		// Full clearing
+		context.clearRect(0, 0, clientWidth, clientWidth);
 
+		// Use tiling
+		tiling.setup(clientWidth, clientWidth, contentWidth, contentWidth, cellWidth, cellWidth);
+		tiling.render(left, top, zoom, paint);
+	};
+	
+    reflow() {
+        const {container, contentWidth, scroller} = this
+        this.clientWidth = container.clientWidth;
+        scroller.setDimensions(this.clientWidth, this.clientWidth, contentWidth, contentWidth);
+    };
   componentDidMount(){
     var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
     // Settings
-	var contentHeight = 1000;
-	var cellHeight = 5;
 	
 	content.addEventListener("mousedown", this.handleMouseDown, false); 
     var context = content.getContext('2d');
     this.context = context
-	var tiling = new Tiling;
+    var tiling = new Tiling;
+    this.tiling = tiling
 	
 
 
 
-	// Canvas renderer
-	var render = function(left, top, zoom) {
-		
-		// Sync current dimensions with canvas
-		content.width = clientWidth;
-		content.height = clientHeight;
-		
-		// Full clearing
-		context.clearRect(0, 0, clientWidth, clientHeight);
-
-		// Use tiling
-		tiling.setup(clientWidth, clientHeight, contentWidth, contentHeight, cellWidth, cellHeight);
-		tiling.render(left, top, zoom, paint);
-	};
-	
-
-
-
-	// Intialize layout
-    var clientWidth = 0;
-    var clientHeight = 0;
+	// Canvas render
 
     // Initialize Scroller
-    var scroller = new Scroller(render, {
+    var scroller = new Scroller(this.renderTiles, {
         zooming: true
     });
     this.scroller = scroller
@@ -109,14 +110,10 @@ scroller.setPosition(rect.left + container.clientLeft, rect.top + container.clie
 
 
 // Reflow handling
-var reflow = function() {
-	clientWidth = container.clientWidth;
-	clientHeight = container.clientHeight;
-	scroller.setDimensions(clientWidth, clientHeight, contentWidth, contentHeight);
-};
 
-window.addEventListener("resize", reflow, false);
-reflow();
+
+window.addEventListener("resize", this.reflow, false);
+this.reflow();
 
 var checkboxes = document.querySelectorAll("#settings input[type=checkbox]");
 for (var i=0, l=checkboxes.length; i<l; i++) {
