@@ -17,10 +17,10 @@ class Canvas extends PureComponent {
   componentDidMount(){
 
 	// Settings
-	var contentWidth = 2000;
-	var contentHeight = 2000;
-	var cellWidth = 10;
-	var cellHeight = 10;
+	var contentWidth = 5000;
+	var contentHeight = 5000;
+	var cellWidth = 5;
+	var cellHeight = 5;
 	var pixelSize = cellWidth
 	
 	var content = document.getElementById('content');
@@ -77,7 +77,9 @@ function getPixelSelected(e) {
 	// Cell Paint Logic
 	var paint = function(col, row, left, top, width, height, zoom) {
 
-		context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
+        context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
+        		// context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
+
 		var c = newCellHash[`${row},${col}`]
 		if (c ){
 			context.fillStyle = newCellHash[`${row},${col}`]

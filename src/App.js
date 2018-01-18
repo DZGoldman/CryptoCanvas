@@ -7,6 +7,7 @@ import './css/oswald.css'
 import './css/open-sans.css'
 import './css/pure-min.css'
 import './App.css'
+import './css/ui.css'
 import CanvasContainer from './components/CanvasContainer.js'
 import autoBind from 'react-autobind';
 

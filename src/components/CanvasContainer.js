@@ -151,24 +151,27 @@ class CanvasContainer extends PureComponent {
 //       }
 //     }
 //   }
-//   renderPallate(){
-//     return <div id='palatte-container'>
-//      {enc.numToRbga.map((c, i)=>{
-//       const color = `rgba(${c})` 
-//       return <div onClick={()=>{this.setColor(color)}}className='pallate-button' key={i} style={{backgroundColor: color}}>
-//         </div>
-//     })
-//   }
-//     </div>
+  renderPallate(){
+    return <div id='palatte-container'>
+     {enc.numToRbga.map((c, i)=>{
+      const color = `rgba(${c})` 
+      return <div onClick={()=>{this.setColor(color)}}className='pallate-button' key={i} style={{backgroundColor: color}}>
+        </div>
+    })
+  }
+    </div>
     
-//   }
+  }
 
 
 
   render() {
     return (
       <div>
-      <Canvas/>
+        {this.renderPallate()}
+      <Canvas
+        currentColor = {'rgba(0,0,255,255)'}
+      />
       <div onClick={this.test}>test</div>
       <div onClick={this.test2}>test2</div>
       <div>size{this.state.pixelSize}</div>
