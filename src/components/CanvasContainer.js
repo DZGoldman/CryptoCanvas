@@ -9,9 +9,7 @@ class CanvasContainer extends PureComponent {
     super(props)
     
     this.state = {
-      test: '',
-      pixelSize: 10,
-      width: 100,
+      currentColor:'asdf'
     }
 
     this.height = this.state.width ;
@@ -117,10 +115,10 @@ class CanvasContainer extends PureComponent {
 // //   context.fillStyle = 'document.defaultView.getComputedStyle(e.target,null)['backgroundColor']';
 // }
 
-// setColor(color){
-//   // console.log(color)
-//   this.context.fillStyle = color
-// }
+setColor(currentColor){
+  // console.log(color)
+  this.setState({currentColor})
+}
 
 //   draw(e){
 //     const pixel = this.getPixelSelected(e);
@@ -153,8 +151,7 @@ class CanvasContainer extends PureComponent {
 //   }
   renderPallate(){
     return <div id='palatte-container'>
-     {enc.numToRbga.map((c, i)=>{
-      const color = `rgba(${c})` 
+     {enc.numToRbgaFull.map((color, i)=>{
       return <div onClick={()=>{this.setColor(color)}}className='pallate-button' key={i} style={{backgroundColor: color}}>
         </div>
     })
@@ -170,7 +167,7 @@ class CanvasContainer extends PureComponent {
       <div>
         {this.renderPallate()}
       <Canvas
-        currentColor = {'rgba(0,0,255,255)'}
+        currentColor = {this.state.currentColor}
       />
       <div onClick={this.test}>test</div>
       <div onClick={this.test2}>test2</div>

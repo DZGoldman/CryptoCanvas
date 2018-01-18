@@ -7,6 +7,8 @@ export const numToRbga = [ '0,0,0,0', // blank
                     '0,0,255,255' //blue
                 ]
 
+export const numToRbgaFull = numToRbga.map((c)=>`rgba(${c})`)
+
 const rgbaToNum = {}
 for (var i = 0; i < numToRbga.length; i++){
     rgbaToNum[numToRbga[i]] = i
