@@ -18,37 +18,36 @@ class Canvas extends PureComponent {
         })
     autoBind(this);
   }
+handleMouseDown(e) {
+    const {getPixelSelected, newCellHash} = this
+    const pixel =getPixelSelected(e)
+    newCellHash[`${pixel['x']},${pixel['y']}`] = this.props.currentColor
+}
+ getPixelSelected(e) {
+    var { cellWidth, content, scroller} = this
+
+	const {values, zoom, left, top} = scroller.getValues()
+
+    const rect = content.getBoundingClientRect();
+	const pixel = new Array;
+        
+    pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/cellWidth )/ zoom ) ;
+    pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/cellWidth )/zoom ); 
+        
+     return pixel;
+}
 
   componentDidMount(){
     var {contentWidth, cellWidth, newCellHash, content, container} = this
     // Settings
 	var contentHeight = 1000;
 	var cellHeight = 5;
-	var pixelSize = cellWidth
 	
-	content.addEventListener("mousedown", handleMouseDown, false); 
+	content.addEventListener("mousedown", this.handleMouseDown, false); 
 	var context = content.getContext('2d');
 	var tiling = new Tiling;
 	
-function handleMouseDown(e) {
-		var pixel = getPixelSelected(e)
-		newCellHash[`${pixel['x']},${pixel['y']}`] = 'rgba(0,0,255,255)'
-	}
 
-function getPixelSelected(e) {
-	const values = scroller.getValues()
-	const zoomLevel = values.zoom;
-	const left = values.left
-	const top = values.top
-        var rect = content.getBoundingClientRect(),
-			pixel = new Array;
-        
-        pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/pixelSize )/ zoomLevel ) ;
-              pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/pixelSize )/zoomLevel ); 
-        
-        return pixel;
-      
-      }
 
 
 	// Canvas renderer
@@ -98,7 +97,7 @@ function getPixelSelected(e) {
     var scroller = new Scroller(render, {
         zooming: true
     });
-
+    this.scroller = scroller
 
     var scrollLeftField = document.getElementById("scrollLeft");
     var scrollTopField = document.getElementById("scrollTop");

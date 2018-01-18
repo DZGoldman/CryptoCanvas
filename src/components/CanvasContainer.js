@@ -9,7 +9,7 @@ class CanvasContainer extends PureComponent {
     super(props)
     
     this.state = {
-      currentColor:'asdf'
+      currentColor: enc.numToRbgaFull[1]
     }
 
     this.height = this.state.width ;
