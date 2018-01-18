@@ -10,16 +10,19 @@ class Canvas extends PureComponent {
   constructor(props) {
     super(props)
 
-
+    Object.assign(this,{
+        contentWidth: 1000,
+        cellWidth: 5,
+        clientWidth: 0,
+        newCellHash: {}
+        })
     autoBind(this);
   }
 
   componentDidMount(){
-
-	// Settings
-	var contentWidth = 5000;
-	var contentHeight = 5000;
-	var cellWidth = 5;
+    var {contentWidth, cellWidth, newCellHash} = this
+    // Settings
+	var contentHeight = 1000;
 	var cellHeight = 5;
 	var pixelSize = cellWidth
 	
