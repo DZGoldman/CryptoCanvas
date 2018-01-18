@@ -7,51 +7,54 @@ import Scroller from '../utils/Scroller'
 import Tiling from '../utils/Tiling'
 
 class Canvas extends PureComponent {
-  constructor(props) {
+    constructor(props) {
     super(props)
 
-    Object.assign(this,{
-        contentWidth: 1000,
-        cellWidth: 5,
-        clientWidth: 0,
-        newCellHash: {}
-        })
-    autoBind(this);
-  }
-handleMouseDown(e) {
-    const {getPixelSelected, newCellHash} = this
-    const pixel =getPixelSelected(e)
-    newCellHash[`${pixel['x']},${pixel['y']}`] = this.props.currentColor
-}
- getPixelSelected(e) {
-    var { cellWidth, content, scroller} = this
+        Object.assign(this,{
+            contentWidth: 1000,
+            cellWidth: 5,
+            clientWidth: 0,
+            newCellHash: {}
+            })
+         autoBind(this);
+     }
 
-	const {values, zoom, left, top} = scroller.getValues()
+    handleMouseDown(e) {
+        const {getPixelSelected, newCellHash} = this
+        const pixel =getPixelSelected(e)
+        newCellHash[`${pixel['x']},${pixel['y']}`] = this.props.currentColor
+    }
 
-    const rect = content.getBoundingClientRect();
-	const pixel = new Array;
-        
-    pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/cellWidth )/ zoom ) ;
-    pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/cellWidth )/zoom ); 
-        
-     return pixel;
-}
+    getPixelSelected(e) {
+        const { cellWidth, content, scroller} = this
+        const {values, zoom, left, top} = scroller.getValues()
+
+        const rect = content.getBoundingClientRect();
+        const pixel = new Array;
+            
+        pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/cellWidth )/ zoom ) ;
+        pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/cellWidth )/zoom ); 
+        return pixel;
+    }
 	// Cell Paint Logic
 	paint(col, row, left, top, width, height, zoom) {
+        
+
         const {context, newCellHash} = this
         context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
         // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
+                // context.fillStyle = getRandomColor()
 
-		var newlyPaintedCell = newCellHash[`${row},${col}`]
+
+		const newlyPaintedCell = newCellHash[`${row},${col}`]
 		if (newlyPaintedCell ){
 			context.fillStyle = newlyPaintedCell
 		}
 		context.fillRect(left, top, width, height);
-		
     };
     
     renderTiles (left, top, zoom) {
-        var {contentWidth, cellWidth, newCellHash, content, container, clientWidth, context, paint, tiling} = this
+        var {contentWidth, cellWidth, content, clientWidth, context, paint, tiling} = this
         if (!clientWidth){
             clientWidth = 0
         }
@@ -72,160 +75,153 @@ handleMouseDown(e) {
         this.clientWidth = container.clientWidth;
         scroller.setDimensions(this.clientWidth, this.clientWidth, contentWidth, contentWidth);
     };
-  componentDidMount(){
-    var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
-    // Settings
-	
-	content.addEventListener("mousedown", this.handleMouseDown, false); 
-    var context = content.getContext('2d');
-    this.context = context
-    var tiling = new Tiling;
-    this.tiling = tiling
-	
+
+    componentDidMount(){
+        var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
+        // Settings
+        
+        content.addEventListener("mousedown", this.handleMouseDown, false); 
+        var context = content.getContext('2d');
+        this.context = context
+        var tiling = new Tiling;
+        this.tiling = tiling
+    
+
+        // Initialize Scroller
+        var scroller = new Scroller(this.renderTiles, {
+            zooming: true
+        });
+        this.scroller = scroller
+
+        var scrollLeftField = document.getElementById("scrollLeft");
+        var scrollTopField = document.getElementById("scrollTop");
+        var zoomLevelField = document.getElementById("zoomLevel");
+
+        setInterval(function() {
+            var values = scroller.getValues();
+            scrollLeftField.value = values.left.toFixed(2);
+            scrollTopField.value = values.top.toFixed(2);
+            zoomLevelField.value = values.zoom.toFixed(2);
+        }, 500);
+
+
+        var rect = container.getBoundingClientRect();
+        scroller.setPosition(rect.left + container.clientLeft, rect.top + container.clientTop);
 
 
 
-	// Canvas render
+        window.addEventListener("resize", this.reflow, false);
+        this.reflow();
 
-    // Initialize Scroller
-    var scroller = new Scroller(this.renderTiles, {
-        zooming: true
-    });
-    this.scroller = scroller
+        var checkboxes = document.querySelectorAll("#settings input[type=checkbox]");
+        for (var i=0, l=checkboxes.length; i<l; i++) {
+            checkboxes[i].addEventListener("change", function() {
+                scroller.options[this.id] = this.checked;
+            }, false);
+        }
 
-    var scrollLeftField = document.getElementById("scrollLeft");
-    var scrollTopField = document.getElementById("scrollTop");
-    var zoomLevelField = document.getElementById("zoomLevel");
+        document.querySelector("#settings #zoom").addEventListener("click", function() {
+            scroller.zoomTo(parseFloat(document.getElementById("zoomLevel").value));
+        }, false);
 
-    setInterval(function() {
-        var values = scroller.getValues();
-        scrollLeftField.value = values.left.toFixed(2);
-        scrollTopField.value = values.top.toFixed(2);
-        zoomLevelField.value = values.zoom.toFixed(2);
-    }, 500);
+        document.querySelector("#settings #zoomIn").addEventListener("click", function() {
+            scroller.zoomBy(1.2, true);
+        }, false);
 
+        document.querySelector("#settings #zoomOut").addEventListener("click", function() {
+            scroller.zoomBy(0.8, true);
+        }, false);
 
-var rect = container.getBoundingClientRect();
-scroller.setPosition(rect.left + container.clientLeft, rect.top + container.clientTop);
+        document.querySelector("#settings #scrollTo").addEventListener("click", function() {
+            scroller.scrollTo(parseFloat(document.getElementById("scrollLeft").value), parseFloat(document.getElementById("scrollTop").value), true);
+        }, false);
 
+        document.querySelector("#settings #scrollByUp").addEventListener("click", function() {
+            scroller.scrollBy(0, -150, true);
+        }, false);
 
-// Reflow handling
+        document.querySelector("#settings #scrollByRight").addEventListener("click", function() {
+            scroller.scrollBy(150, 0, true);
+        }, false);
 
+        document.querySelector("#settings #scrollByDown").addEventListener("click", function() {
+            scroller.scrollBy(0, 150, true);
+        }, false);
 
-window.addEventListener("resize", this.reflow, false);
-this.reflow();
-
-var checkboxes = document.querySelectorAll("#settings input[type=checkbox]");
-for (var i=0, l=checkboxes.length; i<l; i++) {
-	checkboxes[i].addEventListener("change", function() {
-		scroller.options[this.id] = this.checked;
-	}, false);
-}
-
-document.querySelector("#settings #zoom").addEventListener("click", function() {
-	scroller.zoomTo(parseFloat(document.getElementById("zoomLevel").value));
-}, false);
-
-document.querySelector("#settings #zoomIn").addEventListener("click", function() {
-	scroller.zoomBy(1.2, true);
-}, false);
-
-document.querySelector("#settings #zoomOut").addEventListener("click", function() {
-	scroller.zoomBy(0.8, true);
-}, false);
-
-document.querySelector("#settings #scrollTo").addEventListener("click", function() {
-	scroller.scrollTo(parseFloat(document.getElementById("scrollLeft").value), parseFloat(document.getElementById("scrollTop").value), true);
-}, false);
-
-document.querySelector("#settings #scrollByUp").addEventListener("click", function() {
-	scroller.scrollBy(0, -150, true);
-}, false);
-
-document.querySelector("#settings #scrollByRight").addEventListener("click", function() {
-	scroller.scrollBy(150, 0, true);
-}, false);
-
-document.querySelector("#settings #scrollByDown").addEventListener("click", function() {
-	scroller.scrollBy(0, 150, true);
-}, false);
-
-document.querySelector("#settings #scrollByLeft").addEventListener("click", function() {
-	scroller.scrollBy(-150, 0, true);
-}, false);
+        document.querySelector("#settings #scrollByLeft").addEventListener("click", function() {
+            scroller.scrollBy(-150, 0, true);
+        }, false);
 
 
-if ('ontouchstart' in window) {
+        if ('ontouchstart' in window) {
 
-	container.addEventListener("touchstart", function(e) {
-		// Don't react if initial down happens on a form element
-		if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
-			return;
-		}
+            container.addEventListener("touchstart", function(e) {
+                // Don't react if initial down happens on a form element
+                if (e.touches[0] && e.touches[0].target && e.touches[0].target.tagName.match(/input|textarea|select/i)) {
+                    return;
+                }
 
-		scroller.doTouchStart(e.touches, e.timeStamp);
-		e.preventDefault();
-	}, false);
+                scroller.doTouchStart(e.touches, e.timeStamp);
+                e.preventDefault();
+            }, false);
 
-	document.addEventListener("touchmove", function(e) {
-		scroller.doTouchMove(e.touches, e.timeStamp, e.scale);
-	}, false);
+            document.addEventListener("touchmove", function(e) {
+                scroller.doTouchMove(e.touches, e.timeStamp, e.scale);
+            }, false);
 
-	document.addEventListener("touchend", function(e) {
-		scroller.doTouchEnd(e.timeStamp);
-	}, false);
+            document.addEventListener("touchend", function(e) {
+                scroller.doTouchEnd(e.timeStamp);
+            }, false);
 
-	document.addEventListener("touchcancel", function(e) {
-		scroller.doTouchEnd(e.timeStamp);
-	}, false);
+            document.addEventListener("touchcancel", function(e) {
+                scroller.doTouchEnd(e.timeStamp);
+            }, false);
 
-} else {
+        } else {
 
-	var mousedown = false;
+            var mousedown = false;
 
-	container.addEventListener("mousedown", function(e) {
-		if (e.target.tagName.match(/input|textarea|select/i)) {
-			return;
-		}
-		
-		scroller.doTouchStart([{
-			pageX: e.pageX,
-			pageY: e.pageY
-		}], e.timeStamp);
+            container.addEventListener("mousedown", function(e) {
+                if (e.target.tagName.match(/input|textarea|select/i)) {
+                    return;
+                }
+                
+                scroller.doTouchStart([{
+                    pageX: e.pageX,
+                    pageY: e.pageY
+                }], e.timeStamp);
 
-		mousedown = true;
-	}, false);
+                mousedown = true;
+            }, false);
 
-	document.addEventListener("mousemove", function(e) {
-		if (!mousedown) {
-			return;
-		}
-		
-		scroller.doTouchMove([{
-			pageX: e.pageX,
-			pageY: e.pageY
-		}], e.timeStamp);
+            document.addEventListener("mousemove", function(e) {
+                if (!mousedown) {
+                    return;
+                }
+                
+                scroller.doTouchMove([{
+                    pageX: e.pageX,
+                    pageY: e.pageY
+                }], e.timeStamp);
 
-		mousedown = true;
-	}, false);
+                mousedown = true;
+            }, false);
 
-	document.addEventListener("mouseup", function(e) {
-		if (!mousedown) {
-			return;
-		}
-		
-		scroller.doTouchEnd(e.timeStamp);
+            document.addEventListener("mouseup", function(e) {
+                if (!mousedown) {
+                    return;
+                }
+                
+                scroller.doTouchEnd(e.timeStamp);
 
-		mousedown = false;
-	}, false);
+                mousedown = false;
+            }, false);
 
-	container.addEventListener(navigator.userAgent.indexOf("Firefox") > -1 ? "DOMMouseScroll" :  "mousewheel", function(e) {
-		scroller.doMouseZoom(e.detail ? (e.detail * -120) : e.wheelDelta, e.timeStamp, e.pageX, e.pageY);
-	}, false);
-
-}
-
-  }
+            container.addEventListener(navigator.userAgent.indexOf("Firefox") > -1 ? "DOMMouseScroll" :  "mousewheel", function(e) {
+                scroller.doMouseZoom(e.detail ? (e.detail * -120) : e.wheelDelta, e.timeStamp, e.pageX, e.pageY);
+            }, false);
+        }
+    }
 
   render() {
     return (
@@ -260,3 +256,12 @@ if ('ontouchstart' in window) {
 }
 
 export default Canvas
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
