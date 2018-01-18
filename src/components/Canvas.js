@@ -20,23 +20,18 @@ class Canvas extends PureComponent {
   }
 
   componentDidMount(){
-    var {contentWidth, cellWidth, newCellHash} = this
+    var {contentWidth, cellWidth, newCellHash, content, container} = this
     // Settings
 	var contentHeight = 1000;
 	var cellHeight = 5;
 	var pixelSize = cellWidth
 	
-	var content = document.getElementById('content');
 	content.addEventListener("mousedown", handleMouseDown, false); 
 	var context = content.getContext('2d');
 	var tiling = new Tiling;
 	
-	function handleMouseDown(e) {
-		var ctx = context
+function handleMouseDown(e) {
 		var pixel = getPixelSelected(e)
-		ctx.fillStyle = 'rgba(0,0,255,255)'
-		console.log(pixel)
-		// ctx.fillRect(pixel['x'], pixel['y'], pixelSize, pixelSize);
 		newCellHash[`${pixel['x']},${pixel['y']}`] = 'rgba(0,0,255,255)'
 	}
 
@@ -45,11 +40,8 @@ function getPixelSelected(e) {
 	const zoomLevel = values.zoom;
 	const left = values.left
 	const top = values.top
-	console.log(zoomLevel)
-	var canvas = content
-        var rect = canvas.getBoundingClientRect(),
+        var rect = content.getBoundingClientRect(),
 			pixel = new Array;
-			console.log(rect)
         
         pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/pixelSize )/ zoomLevel ) ;
               pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/pixelSize )/zoomLevel ); 
@@ -74,9 +66,6 @@ function getPixelSelected(e) {
 		tiling.render(left, top, zoom, paint);
 	};
 	
-	var newCellHash = {
-
-	}
 	// Cell Paint Logic
 	var paint = function(col, row, left, top, width, height, zoom) {
 
@@ -102,27 +91,25 @@ function getPixelSelected(e) {
 
 
 	// Intialize layout
-var container = document.getElementById("container");
-var content = document.getElementById("content");
-var clientWidth = 0;
-var clientHeight = 0;
+    var clientWidth = 0;
+    var clientHeight = 0;
 
-// Initialize Scroller
-var scroller = new Scroller(render, {
-	zooming: true
-});
+    // Initialize Scroller
+    var scroller = new Scroller(render, {
+        zooming: true
+    });
 
 
-var scrollLeftField = document.getElementById("scrollLeft");
-var scrollTopField = document.getElementById("scrollTop");
-var zoomLevelField = document.getElementById("zoomLevel");
+    var scrollLeftField = document.getElementById("scrollLeft");
+    var scrollTopField = document.getElementById("scrollTop");
+    var zoomLevelField = document.getElementById("zoomLevel");
 
-setInterval(function() {
-	var values = scroller.getValues();
-	scrollLeftField.value = values.left.toFixed(2);
-	scrollTopField.value = values.top.toFixed(2);
-	zoomLevelField.value = values.zoom.toFixed(2);
-}, 500);
+    setInterval(function() {
+        var values = scroller.getValues();
+        scrollLeftField.value = values.left.toFixed(2);
+        scrollTopField.value = values.top.toFixed(2);
+        zoomLevelField.value = values.zoom.toFixed(2);
+    }, 500);
 
 
 var rect = container.getBoundingClientRect();
@@ -254,11 +241,11 @@ if ('ontouchstart' in window) {
   render() {
     return (
       <div>
-     <div id="container">
-     <canvas id="content"></canvas>
- </div>
+     <div ref={(container)=> this.container = container} id="container">
+     <canvas ref={(content)=> this.content = content} id="content"></canvas>
+    </div>
  
- <div id="settings">
+    <div id="settings">
      <div><label for="scrollingX">ScrollingX: </label><input type="checkbox" id="scrollingX" checked/></div>
      <div><label for="scrollingY">ScrollingY: </label><input type="checkbox" id="scrollingY" checked/></div>
      <div><label for="animating">Animating: </label><input type="checkbox" id="animating" checked/></div>
