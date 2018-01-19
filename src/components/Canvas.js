@@ -6,7 +6,7 @@ import '../utils/Animate'
 import Scroller from '../utils/Scroller'
 import Tiling from '../utils/Tiling'
 import * as enc from '../helpers/encript'
-
+window.paintCount = 0
 class Canvas extends PureComponent {
     constructor(props) {
     super(props)
@@ -19,25 +19,44 @@ class Canvas extends PureComponent {
             })
         this.canvasWidth = this.contentWidth/this.cellWidth
          autoBind(this);
+         this.state = {
+             surfaceArea:{
+                 area: 'n/a',
+             }
+         }
      }
+    clear(e){
+        this.newCellHash = {}
 
+    }
     newCellSurfaceArea (){
         const {newCellHash, canvasWidth} = this
         const coordinates = Object.keys(newCellHash).map((cString)=> cString.split(',').map((s)=>+s) )
         
         const xCoordinates = coordinates.map((c)=> c[0])
         const yCoordinates =  coordinates.map((c)=> c[1])
+        if (!xCoordinates.length || !yCoordinates.length){
+            return {
+                    topLeft: 'n/a',
+                    area: 'n/a'
+                }
+            }
+        
         const xMin = Math.min(...xCoordinates)
         const xMax =  Math.max(...xCoordinates)
         const yMin = Math.min(...yCoordinates)
-        const yMax =  Math.max(...yCoordinates)
-    
+        const yMax =  Math.max(...yCoordinates)        
         const topLeft = yMin * canvasWidth + xMin;
-        const area = (1+ xMax - xMin) * (1 + yMax - yMin)
+        // const area = (1+ xMax - xMin) * (1 + yMax - yMin)
+        const s = Math.max(( xMax - xMin), (yMax - yMin) ) + 1
+        const area = s**2
         return {
             topLeft,
             area
         }
+    }
+    setSurfaceArea(surfaceArea){
+        this.setState({surfaceArea})
     }
 
     handleMouseDown(e) {
@@ -48,11 +67,11 @@ class Canvas extends PureComponent {
 
         if (newCellHash[coordinateStr] == currentColor ) {
             delete newCellHash[coordinateStr] 
+            this.setSurfaceArea(this.newCellSurfaceArea())
         } else if (initialCanvas[ pixel['x'] + (canvasWidth*pixel['y'])]  != currentColor){
             newCellHash[coordinateStr] = currentColor
+            this.setSurfaceArea(this.newCellSurfaceArea())
         }
-        console.log(this.newCellSurfaceArea())
-
     }
 
     getPixelSelected(e) {
@@ -78,6 +97,10 @@ class Canvas extends PureComponent {
     // }
 	// Cell Paint Logic
 	paint(col, row, left, top, width, height, zoom) {
+        window.paintCount ++
+        if( window.paintCount % 10000 ==0){
+            console.log( window.paintCount)
+        }
         const {context, newCellHash, canvasWidth, initialCanvas} = this
 
 
@@ -240,7 +263,7 @@ class Canvas extends PureComponent {
             }, false);
 
             document.addEventListener("mousemove", function(e) {
-                if (!mousedown) {
+                if (!mousedown || !e.shiftKey) {
                     return;
                 }
                 
@@ -283,6 +306,7 @@ class Canvas extends PureComponent {
     return (
       <div>
      <div ref={(container)=> this.container = container} id="container">
+     
      <canvas ref={(content)=> this.content = content} id="content"></canvas>
     </div>
  
@@ -304,6 +328,9 @@ class Canvas extends PureComponent {
      <div><button id="scrollTo">Scroll to Coords</button></div>
 
      <div><button id="scrollByUp">&uarr;</button><button id="scrollByDown">&darr;</button><button id="scrollByLeft">&larr;</button><button id="scrollByRight">&rarr;</button></div>
+        <div>Surface Area: {this.state.surfaceArea.area}</div>
+        <div>Top coordinate: {this.state.surfaceArea.topLeft}</div>
+        <div onClick={this.clear}>clear</div>
  </div>
  
       </div>
