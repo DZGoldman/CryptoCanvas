@@ -5,14 +5,15 @@ import '../utils/Animate'
 
 import Scroller from '../utils/Scroller'
 import Tiling from '../utils/Tiling'
+import * as enc from '../helpers/encript'
 
 class Canvas extends PureComponent {
     constructor(props) {
     super(props)
 
         Object.assign(this,{
-            contentWidth: 1000,
-            cellWidth: 5,
+            contentWidth:  100,
+            cellWidth: 10,
             clientWidth: 0,
             newCellHash: {}
             })
@@ -34,14 +35,24 @@ class Canvas extends PureComponent {
             
         pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/cellWidth )/ zoom ) ;
         pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/cellWidth )/zoom ); 
+        console.log(this.getCurrentColor(pixel))
         return pixel;
+    }
+    getCurrentColor(pixel){
+        const { initialCanvas, contentWidth, cellWidth} = this
+        const width = contentWidth / cellWidth
+        console.log(pixel)
+        const index =  pixel['y']*width + pixel['x']
+        console.log(index)
+
+        return initialCanvas[index ]
     }
 	// Cell Paint Logic
 	paint(col, row, left, top, width, height, zoom) {
         
 
         const {context, newCellHash} = this
-        context.fillStyle = row%2 + col%2 > 0 ? "#ddd" : "red";
+        context.fillStyle = row%2 + col%2 > 0 ? enc.numToRbgaFull[0] :  enc.numToRbgaFull[1];
         // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
                 // context.fillStyle = getRandomColor()
 
@@ -86,7 +97,7 @@ class Canvas extends PureComponent {
         var tiling = new Tiling;
         this.tiling = tiling
     
-
+    
         // Initialize Scroller
         var scroller = new Scroller(this.renderTiles, {
             zooming: true
@@ -221,6 +232,12 @@ class Canvas extends PureComponent {
                 scroller.doMouseZoom(e.detail ? (e.detail * -120) : e.wheelDelta, e.timeStamp, e.pageX, e.pageY);
             }, false);
         }
+
+        this.initialCanvas = this.context.getImageData(0,0,this.contentWidth, this.contentWidth).data
+        this.initialCanvas = enc.clampedArrToNumArr(this.initialCanvas)
+        // this.initialCanvas = enc.zoom(this.initialCanvas, 1/this.cellWidth)
+        console.log('sadfdasfdasf',this.initialCanvas.length)
+        // console.log(this.initialCanvas)
     }
 
   render() {

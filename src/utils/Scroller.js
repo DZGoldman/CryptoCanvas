@@ -57,7 +57,7 @@ var Scroller;
 			minZoom: 0.02,
 
 			/** Maximum zoom level */
-			maxZoom: 5,
+			maxZoom: 10,
 
 			/** Multiply or decrease scrolling speed **/
 			speedMultiplier: 1,
