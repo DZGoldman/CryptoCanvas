@@ -9,7 +9,7 @@ class CanvasContainer extends PureComponent {
     super(props)
     
     this.state = {
-      currentColor: enc.numToRbgaFull[1]
+      currentColor: 1
     }
 
     this.height = this.state.width ;
@@ -152,7 +152,7 @@ setColor(currentColor){
   renderPallate(){
     return <div id='palatte-container'>
      {enc.numToRbgaFull.map((color, i)=>{
-      return <div onClick={()=>{this.setColor(color)}}className='pallate-button' key={i} style={{backgroundColor: color}}>
+      return <div onClick={()=>{this.setColor(i)}}className='pallate-button' key={i} style={{backgroundColor: color}}>
         </div>
     })
   }

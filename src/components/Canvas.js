@@ -12,18 +12,47 @@ class Canvas extends PureComponent {
     super(props)
 
         Object.assign(this,{
-            contentWidth:  100,
-            cellWidth: 10,
+            contentWidth:  5000,
+            cellWidth: 5,
             clientWidth: 0,
             newCellHash: {}
             })
+        this.canvasWidth = this.contentWidth/this.cellWidth
          autoBind(this);
      }
 
+    newCellSurfaceArea (){
+        const {newCellHash, canvasWidth} = this
+        const coordinates = Object.keys(newCellHash).map((cString)=> cString.split(',').map((s)=>+s) )
+        
+        const xCoordinates = coordinates.map((c)=> c[0])
+        const yCoordinates =  coordinates.map((c)=> c[1])
+        const xMin = Math.min(...xCoordinates)
+        const xMax =  Math.max(...xCoordinates)
+        const yMin = Math.min(...yCoordinates)
+        const yMax =  Math.max(...yCoordinates)
+    
+        const topLeft = yMin * canvasWidth + xMin;
+        const area = (1+ xMax - xMin) * (1 + yMax - yMin)
+        return {
+            topLeft,
+            area
+        }
+    }
+
     handleMouseDown(e) {
-        const {getPixelSelected, newCellHash} = this
-        const pixel =getPixelSelected(e)
-        newCellHash[`${pixel['x']},${pixel['y']}`] = this.props.currentColor
+        const {getPixelSelected, newCellHash, initialCanvas, canvasWidth} = this;
+        const currentColor = this.props.currentColor
+        const pixel =getPixelSelected(e);
+        const coordinateStr = `${pixel['x']},${pixel['y']}`
+
+        if (newCellHash[coordinateStr] == currentColor ) {
+            delete newCellHash[coordinateStr] 
+        } else if (initialCanvas[ pixel['x'] + (canvasWidth*pixel['y'])]  != currentColor){
+            newCellHash[coordinateStr] = currentColor
+        }
+        console.log(this.newCellSurfaceArea())
+
     }
 
     getPixelSelected(e) {
@@ -35,32 +64,35 @@ class Canvas extends PureComponent {
             
         pixel['x'] = Math.floor( ((e.clientX + left- rect.left)/cellWidth )/ zoom ) ;
         pixel['y'] = Math.floor( ((e.clientY + top - rect.top)/cellWidth )/zoom ); 
-        console.log(this.getCurrentColor(pixel))
+        // console.log(this.getCurrentColor(pixel))
         return pixel;
     }
-    getCurrentColor(pixel){
-        const { initialCanvas, contentWidth, cellWidth} = this
-        const width = contentWidth / cellWidth
-        console.log(pixel)
-        const index =  pixel['y']*width + pixel['x']
-        console.log(index)
+    // getCurrentColor(pixel){
+    //     const { initialCanvas, contentWidth, cellWidth} = this
+    //     const width = contentWidth / cellWidth
+    //     console.log(pixel)
+    //     const index =  pixel['y']*width + pixel['x']
+    //     console.log(index)
 
-        return initialCanvas[index ]
-    }
+    //     return initialCanvas[index ]
+    // }
 	// Cell Paint Logic
 	paint(col, row, left, top, width, height, zoom) {
-        
-
-        const {context, newCellHash} = this
-        context.fillStyle = row%2 + col%2 > 0 ? enc.numToRbgaFull[0] :  enc.numToRbgaFull[1];
-        // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
-                // context.fillStyle = getRandomColor()
+        const {context, newCellHash, canvasWidth, initialCanvas} = this
 
 
-		const newlyPaintedCell = newCellHash[`${row},${col}`]
+        // paint either a newly painted cell or from canvas state
+		const newlyPaintedCell = enc.numToRbgaFull[newCellHash[`${row},${col}`]]
 		if (newlyPaintedCell ){
 			context.fillStyle = newlyPaintedCell
-		}
+		} else {
+            context.fillStyle = enc.numToRbgaFull[initialCanvas[row* canvasWidth + col]]
+            // context.fillStyle = getRandomColor()
+                    // context.fillStyle = row%2 + col%2 > 0 ? enc.numToRbgaFull[0] :  enc.numToRbgaFull[1];
+        // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
+
+
+        }
 		context.fillRect(left, top, width, height);
     };
     
@@ -90,6 +122,8 @@ class Canvas extends PureComponent {
     componentDidMount(){
         var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
         // Settings
+        this.setInitialCanvas()
+
         
         content.addEventListener("mousedown", this.handleMouseDown, false); 
         var context = content.getContext('2d');
@@ -233,14 +267,19 @@ class Canvas extends PureComponent {
             }, false);
         }
 
-        this.initialCanvas = this.context.getImageData(0,0,this.contentWidth, this.contentWidth).data
-        this.initialCanvas = enc.clampedArrToNumArr(this.initialCanvas)
-        // this.initialCanvas = enc.zoom(this.initialCanvas, 1/this.cellWidth)
-        console.log('sadfdasfdasf',this.initialCanvas.length)
         // console.log(this.initialCanvas)
     }
+    setInitialCanvas(){
+        const {contentWidth, cellWidth} = this
+        const width = contentWidth / cellWidth;
+        
+        this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
+            return Math.random() > 0.5 ? 0: 1
+        })
 
+    }
   render() {
+      console.log('rendering')
     return (
       <div>
      <div ref={(container)=> this.container = container} id="container">
