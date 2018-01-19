@@ -12,8 +12,8 @@ class Canvas extends PureComponent {
     super(props)
 
         Object.assign(this,{
-            contentWidth:  5000,
-            cellWidth: 5,
+            contentWidth:  100,
+            cellWidth: 10,
             clientWidth: 0,
             newCellHash: {}
             })
@@ -55,6 +55,33 @@ class Canvas extends PureComponent {
             area
         }
     }
+    canvasIndexToCoordinates(index){
+        const {canvasWidth} = this 
+        const y = Math.floor(index/canvasWidth)
+        const x = index % canvasWidth;
+        return `${x},${y}`
+    }
+    canvasCoordinatesToIndex(x,y){
+        return y* this.canvasWidth + x
+    }
+    newCellsToNumStr(){
+        const {topLeft, area} = this.state.surfaceArea;
+        const {canvasCoordinatesToIndex, canvasIndexToCoordinates, canvasWidth, initialCanvas,newCellHash} = this 
+        // const startingC = canvasIndexToCoordinates(topLeft);
+        const areaWidth = Math.sqrt(area);
+        var currentIndex;
+        const skipLength = canvasWidth - areaWidth;
+        var newNumStr=''
+        var newCellValue
+        for(var i = 0; i < area; i++ ) {
+            currentIndex = topLeft + i + (skipLength * Math.floor(i/areaWidth));
+            newCellValue = newCellHash[canvasIndexToCoordinates(currentIndex)]
+            newNumStr += typeof newCellValue =='number' ? newCellValue : '9'
+        }
+        return newNumStr
+
+
+    }
     setSurfaceArea(surfaceArea){
         this.setState({surfaceArea})
     }
@@ -64,14 +91,18 @@ class Canvas extends PureComponent {
         const currentColor = this.props.currentColor
         const pixel =getPixelSelected(e);
         const coordinateStr = `${pixel['x']},${pixel['y']}`
+        const colorInHash  = newCellHash[coordinateStr];
+        const colorInInitialCanvas = initialCanvas[ pixel['x'] + (canvasWidth*pixel['y'])]
 
-        if (newCellHash[coordinateStr] == currentColor ) {
+        if (colorInHash == currentColor ) {
             delete newCellHash[coordinateStr] 
             this.setSurfaceArea(this.newCellSurfaceArea())
-        } else if (initialCanvas[ pixel['x'] + (canvasWidth*pixel['y'])]  != currentColor){
+        }
+         else if (colorInInitialCanvas != currentColor || colorInHash != currentColor){
             newCellHash[coordinateStr] = currentColor
             this.setSurfaceArea(this.newCellSurfaceArea())
         }
+
     }
 
     getPixelSelected(e) {
@@ -97,10 +128,10 @@ class Canvas extends PureComponent {
     // }
 	// Cell Paint Logic
 	paint(col, row, left, top, width, height, zoom) {
-        window.paintCount ++
-        if( window.paintCount % 10000 ==0){
-            console.log( window.paintCount)
-        }
+        // window.paintCount ++
+        // if( window.paintCount % 10000 ==0){
+        //     console.log( window.paintCount)
+        // }
         const {context, newCellHash, canvasWidth, initialCanvas} = this
 
 
@@ -109,7 +140,7 @@ class Canvas extends PureComponent {
 		if (newlyPaintedCell ){
 			context.fillStyle = newlyPaintedCell
 		} else {
-            context.fillStyle = enc.numToRbgaFull[initialCanvas[row* canvasWidth + col]]
+            context.fillStyle = enc.numToRbgaFull[initialCanvas[col* canvasWidth + row]]
             // context.fillStyle = getRandomColor()
                     // context.fillStyle = row%2 + col%2 > 0 ? enc.numToRbgaFull[0] :  enc.numToRbgaFull[1];
         // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
@@ -305,11 +336,12 @@ class Canvas extends PureComponent {
       console.log('rendering')
     return (
       <div>
+          
      <div ref={(container)=> this.container = container} id="container">
      
      <canvas ref={(content)=> this.content = content} id="content"></canvas>
     </div>
- 
+    
     <div id="settings">
      <div><label for="scrollingX">ScrollingX: </label><input type="checkbox" id="scrollingX" checked/></div>
      <div><label for="scrollingY">ScrollingY: </label><input type="checkbox" id="scrollingY" checked/></div>
@@ -331,7 +363,10 @@ class Canvas extends PureComponent {
         <div>Surface Area: {this.state.surfaceArea.area}</div>
         <div>Top coordinate: {this.state.surfaceArea.topLeft}</div>
         <div onClick={this.clear}>clear</div>
+        <div onClick={this.newCellsToNumStr}>test</div>
+
  </div>
+        <div>{this.newCellsToNumStr()}</div>
  
       </div>
     );
