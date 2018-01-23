@@ -2,9 +2,13 @@ import {addFractions, multiplyFractions} from './mathMethods'
 
 
 export const numToRbga = [ '0,0,0,0', // blank
-                    '255,0,0,255', //red
-                    '0,255,0,255', //green
-                    '0,0,255,255' //blue
+                    '224,28,11,1', //red
+                    '13,222,131,1', //green
+                    '13,142,222,1', //blue
+                    '220,220,80,255',
+                    '224,11,149,1',
+                    '0,0,0,1',
+                    '199,106,0,1'
                 ]
 
 export const numToRbgaFull = numToRbga.map((c)=>`rgba(${c})`)
