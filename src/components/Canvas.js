@@ -28,6 +28,7 @@ class Canvas extends PureComponent {
      }
     clear(e){
         this.newCellHash = {}
+        this.reflow()
     }
     saveDrawing(options){
     
@@ -64,7 +65,10 @@ class Canvas extends PureComponent {
         return  newCanvas
     }
     putLatestOnCanvas(){
-        this.getDrawing(this.applyDrawing)
+        this.getDrawing((fullEncryptedStr)=>{
+            this.applyDrawing(fullEncryptedStr)
+            this.reflow()
+        })
     }
     getDrawing(next){
             const {inkTokenInstance, currentUser} = this.props
@@ -222,8 +226,8 @@ class Canvas extends PureComponent {
         const width = contentWidth / cellWidth;
         
         this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
-            return Math.random() > 0.5 ? 0: 1
-            // return i % 2 
+            // return Math.random() > 0.5 ? 0: 1
+            return i % 2 
         })
 
     }
