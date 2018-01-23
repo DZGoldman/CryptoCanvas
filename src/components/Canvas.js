@@ -143,7 +143,7 @@ class Canvas extends PureComponent {
             delete newCellHash[coordinateStr] 
             this.setSurfaceArea(this.newCellSurfaceArea())
         }
-         else if (colorInInitialCanvas != currentColor || colorInHash != currentColor){
+        else if (colorInInitialCanvas != currentColor || (colorInHash && colorInHash != currentColor)){
             newCellHash[coordinateStr] = currentColor
             this.setSurfaceArea(this.newCellSurfaceArea())
         }
