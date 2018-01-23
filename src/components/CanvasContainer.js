@@ -168,6 +168,8 @@ setColor(currentColor){
         {this.renderPallate()}
       <Canvas
         currentColor = {this.state.currentColor}
+        inkTokenInstance={this.props.inkTokenInstance}
+        currentUser ={this.props.currentUser}
       />
       <div onClick={this.test}>test</div>
       <div onClick={this.test2}>test2</div>

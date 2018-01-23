@@ -12,7 +12,7 @@ class Canvas extends PureComponent {
     super(props)
 
         Object.assign(this,{
-            contentWidth:  100,
+            contentWidth:  1000,
             cellWidth: 10,
             clientWidth: 0,
             newCellHash: {}
@@ -22,13 +22,58 @@ class Canvas extends PureComponent {
          this.state = {
              surfaceArea:{
                  area: 'n/a',
+                 topLeft: 'n/a'
              }
          }
      }
     clear(e){
         this.newCellHash = {}
-
     }
+    saveDrawing(options){
+    
+        const newNumStr = this.newCellsToNumStr();
+        const {area, topLeft} = this.state.surfaceArea;
+        const encryptedData = enc.leftRun(newNumStr)
+        const fullEncryptedStr = '1c' + topLeft + 'c' + area + 'c' + encryptedData
+        const {width, pixelSize} = this.state
+        const {inkTokenInstance, currentUser} = this.props
+        inkTokenInstance.drawString('0x' + fullEncryptedStr , {from: currentUser})
+         .then( async (result) => {
+      // Get the value from the contract to prove it worked.
+             this.getDrawing()
+         })
+    }
+    applyDrawing(fullEncryptedStr){
+        const {canvasWidth, initialCanvas} = this
+        const [encryptionType, topLeft, area, encryptedData] = fullEncryptedStr.split('c');
+        const decryptedStr = enc.leftRunDecrypt(encryptedData)
+        const newCanvas = [...initialCanvas];
+        const areaWidth = Math.sqrt(area);
+
+        const skipLength = canvasWidth - areaWidth;
+
+        var currentCanvasIndex, newCellValue;
+        for (var i = 0; i < +area; i ++){
+            currentCanvasIndex = +topLeft + i + (skipLength * Math.floor(i/areaWidth));
+            newCellValue = +decryptedStr[i];
+            if (newCellValue != 9){
+                newCanvas[currentCanvasIndex] = newCellValue
+            }
+        }
+        this.initialCanvas = newCanvas
+        return  newCanvas
+    }
+    putLatestOnCanvas(){
+        this.getDrawing(this.applyDrawing)
+    }
+    getDrawing(next){
+            const {inkTokenInstance, currentUser} = this.props
+        
+            inkTokenInstance.getCanvasString.call({from: currentUser}).then((result)=>{
+
+              next && !next.target && next(result)
+            })
+        }
     newCellSurfaceArea (){
         const {newCellHash, canvasWidth} = this
         const coordinates = Object.keys(newCellHash).map((cString)=> cString.split(',').map((s)=>+s) )
@@ -172,7 +217,16 @@ class Canvas extends PureComponent {
         this.clientWidth = container.clientWidth;
         scroller.setDimensions(this.clientWidth, this.clientWidth, contentWidth, contentWidth);
     };
+    setInitialCanvas(){
+        const {contentWidth, cellWidth} = this
+        const width = contentWidth / cellWidth;
+        
+        this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
+            return Math.random() > 0.5 ? 0: 1
+            // return i % 2 
+        })
 
+    }
     componentDidMount(){
         var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
         // Settings
@@ -323,15 +377,7 @@ class Canvas extends PureComponent {
 
         // console.log(this.initialCanvas)
     }
-    setInitialCanvas(){
-        const {contentWidth, cellWidth} = this
-        const width = contentWidth / cellWidth;
-        
-        this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
-            return Math.random() > 0.5 ? 0: 1
-        })
 
-    }
   render() {
       console.log('rendering')
     return (
@@ -363,7 +409,10 @@ class Canvas extends PureComponent {
         <div>Surface Area: {this.state.surfaceArea.area}</div>
         <div>Top coordinate: {this.state.surfaceArea.topLeft}</div>
         <div onClick={this.clear}>clear</div>
-        <div onClick={this.newCellsToNumStr}>test</div>
+        <div onClick={this.saveDrawing}>test1</div>
+        <div onClick={this.getDrawing}>testget</div>
+        <div onClick={this.putLatestOnCanvas}>test2</div>
+
 
  </div>
         <div>{this.newCellsToNumStr()}</div>
