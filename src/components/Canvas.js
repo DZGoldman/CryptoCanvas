@@ -231,12 +231,33 @@ class Canvas extends PureComponent {
         })
 
     }
+
     componentDidMount(){
         var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
         // Settings
         this.setInitialCanvas()
 
-        
+
+        var done = false
+        window.setInterval(()=>{
+
+            if (!done && this.props.inkTokenInstance){
+                console.log('SETTING EVENT')
+                done = true;
+                const drawEvent = this.props.inkTokenInstance.allEvents(({}, {fromBlock: 0, toBlock: 'latest'}))
+                console.log(drawEvent)
+                drawEvent.watch((error, result)=>{
+                    if (!error)
+                        {
+                            console.warn('SOMEBODY done drawn', result)
+                        } else {
+                            console.log(error);
+                        }
+                });
+            }
+
+        }, 500)
+      
         content.addEventListener("mousedown", this.handleMouseDown, false); 
         var context = content.getContext('2d');
         this.context = context

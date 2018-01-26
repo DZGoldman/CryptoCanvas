@@ -24,6 +24,8 @@ contract InkToken {
     // This notifies clients about the amount burnt
     event Burn(address indexed from, uint256 value);
 
+    event Draw(string canvas);
+
     /**
      * Constrctor function
      *
@@ -50,7 +52,8 @@ contract InkToken {
      }
 
       function drawString(string data) public returns (bool success) {
-        canvasString = data;
+         canvasString = data;
+        Draw(data);
          return true;
       }
          function drawArray(bytes data) public returns (bool success) {
