@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import InkTokenContract from '../build/contracts/InkToken.json'
+import CanvasContract from '../build/contracts/InkToken.json'
+
 
 import getWeb3 from './utils/getWeb3'
 import './css/oswald.css'
@@ -82,7 +84,7 @@ class App extends Component {
 
   instantiateInkToken(){
     const contract = require('truffle-contract')
-    const inkToken = contract(InkTokenContract)
+    const inkToken = contract(CanvasContract)
     inkToken.setProvider(this.state.web3.currentProvider)
 
     this.state.web3.eth.getAccounts( async (error, accounts) => {
