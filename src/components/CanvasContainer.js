@@ -64,7 +64,7 @@ class CanvasContainer extends PureComponent {
     
 
 //     const {width, pixelSize} = this.state
-//     const {inkTokenInstance, currentUser} = this.props
+//     const {canvasInstance, currentUser} = this.props
 //     var method
 
 //     // switch (options.method) {
@@ -82,7 +82,7 @@ class CanvasContainer extends PureComponent {
 //     var r = enc.clampedArrToNumArr(d)
 //     // r = enc.zoom(r, 1/pixelSize)
 //     const encryptedData = enc.encryptMain(r)
-//     inkTokenInstance.drawBytes('0x' + encryptedData , {from: currentUser})
+//     canvasInstance.drawBytes('0x' + encryptedData , {from: currentUser})
 //      .then( async (result) => {
 //       // Get the value from the contract to prove it worked.
 //       this.getDrawing()
@@ -90,9 +90,9 @@ class CanvasContainer extends PureComponent {
 //   }
 
 //   getDrawing(next){
-//     const {inkTokenInstance, currentUser} = this.props
+//     const {canvasInstance, currentUser} = this.props
 
-//     inkTokenInstance.getCanvasBytes.call({from: currentUser}).then((result)=>{
+//     canvasInstance.getCanvasBytes.call({from: currentUser}).then((result)=>{
 //       console.log('?current canvas:', result)
 //       next && next(result)
 //     })
@@ -168,7 +168,7 @@ setColor(currentColor){
         {this.renderPallate()}
       <Canvas
         currentColor = {this.state.currentColor}
-        inkTokenInstance={this.props.inkTokenInstance}
+        canvasInstance={this.props.canvasInstance}
         currentUser ={this.props.currentUser}
       />
       <div onClick={this.test}>test</div>

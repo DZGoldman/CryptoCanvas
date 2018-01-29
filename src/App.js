@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import InkTokenContract from '../build/contracts/InkToken.json'
-import CanvasContract from '../build/contracts/InkToken.json'
+import CanvasContract from '../build/contracts/Canvas.json'
 
 
 import getWeb3 from './utils/getWeb3'
@@ -84,12 +84,12 @@ class App extends Component {
 
   instantiateInkToken(){
     const contract = require('truffle-contract')
-    const inkToken = contract(CanvasContract)
-    inkToken.setProvider(this.state.web3.currentProvider)
+    const canvas = contract(CanvasContract)
+    canvas.setProvider(this.state.web3.currentProvider)
 
     this.state.web3.eth.getAccounts( async (error, accounts) => {
-      const instance = await inkToken.deployed()
-      this.setState({inkTokenInstance: instance, currentUser: accounts[0]})
+      const instance = await canvas.deployed()
+      this.setState({canvasInstance: instance, currentUser: accounts[0]})
     })
   }
 
@@ -112,7 +112,7 @@ class App extends Component {
             </div>
           </div>
           <CanvasContainer
-            inkTokenInstance={this.state.inkTokenInstance}
+            canvasInstance={this.state.canvasInstance}
             currentUser={this.state.currentUser}
           />
         </main>

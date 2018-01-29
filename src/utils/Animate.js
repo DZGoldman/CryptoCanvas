@@ -38,7 +38,6 @@
 	if (!global.core) {
 
 		global.core = { effect : {} };
-		console.log('window', window, window.core)
 
 	} else if (!window.core.effect) {
 		window.core.effect = {};

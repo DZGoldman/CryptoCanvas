@@ -6,6 +6,10 @@ import '../utils/Animate'
 import Scroller from '../utils/Scroller'
 import Tiling from '../utils/Tiling'
 import * as enc from '../helpers/encript'
+
+
+var otherAddress = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"
+
 window.paintCount = 0
 class Canvas extends PureComponent {
     constructor(props) {
@@ -30,6 +34,16 @@ class Canvas extends PureComponent {
         this.newCellHash = {}
         this.reflow()
     }
+    tfer(){
+        console.log(this.props.currentUser)
+        // or sending and using a promise
+        this.props.canvasInstance.methods.myMethod(otherAddress, 9000000000000000).send({from: this.props.currentUser})
+        .then(function(receipt){
+            console.log('done now', receipt)
+            // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+        });
+    }
+  
     saveDrawing(options){
     
         const newNumStr = this.newCellsToNumStr();
@@ -37,8 +51,8 @@ class Canvas extends PureComponent {
         const encryptedData = enc.leftRun(newNumStr)
         const fullEncryptedStr = '1c' + topLeft + 'c' + area + 'c' + encryptedData
         const {width, pixelSize} = this.state
-        const {inkTokenInstance, currentUser} = this.props
-        inkTokenInstance.drawString('0x' + fullEncryptedStr , {from: currentUser})
+        const {canvasInstance, currentUser} = this.props
+        canvasInstance.drawString('0x' + fullEncryptedStr , {from: currentUser})
          .then( async (result) => {
       // Get the value from the contract to prove it worked.
              this.getDrawing()
@@ -71,9 +85,9 @@ class Canvas extends PureComponent {
         })
     }
     getDrawing(next){
-            const {inkTokenInstance, currentUser} = this.props
+            const {canvasInstance, currentUser} = this.props
         
-            inkTokenInstance.getCanvasString.call({from: currentUser}).then((result)=>{
+            canvasInstance.getCanvasString.call({from: currentUser}).then((result)=>{
 
               next && !next.target && next(result)
             })
@@ -241,10 +255,10 @@ class Canvas extends PureComponent {
         var done = false
         window.setInterval(()=>{
 
-            if (!done && this.props.inkTokenInstance){
+            if (!done && this.props.canvasInstance){
                 console.log('SETTING EVENT')
                 done = true;
-                const drawEvent = this.props.inkTokenInstance.allEvents(({}, {fromBlock: 0, toBlock: 'latest'}))
+                const drawEvent = this.props.canvasInstance.allEvents(({}, {fromBlock: 0, toBlock: 'latest'}))
                 console.log(drawEvent)
                 drawEvent.watch((error, result)=>{
                     if (!error)
@@ -437,6 +451,8 @@ class Canvas extends PureComponent {
         <div onClick={this.saveDrawing}>test1</div>
         <div onClick={this.getDrawing}>testget</div>
         <div onClick={this.putLatestOnCanvas}>test2</div>
+        <div onClick={this.tfer}>tfer</div>
+
 
 
  </div>

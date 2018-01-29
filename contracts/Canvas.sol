@@ -2,6 +2,7 @@ pragma solidity ^0.4.16;
 
 interface token {
     function transfer(address receiver, uint amount);
+    function burnFrom(address _from, uint256 _value);
 }
 
 contract Canvas {
@@ -18,8 +19,8 @@ contract Canvas {
 
 
     function drawString(string data) public returns (bool success) {
-         canvasString = data;
         Draw(data);
+         canvasString = data;
          return true;
       }
         function getCanvasString() public returns (string canv) {
