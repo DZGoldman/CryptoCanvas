@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import SimpleStorageContract from '../build/contracts/SimpleStorage.json'
 import InkTokenContract from '../build/contracts/InkToken.json'
 import CanvasContract from '../build/contracts/Canvas.json'
-
+import Crowdsale from '../build/contracts/Crowdsale.json'
 
 import getWeb3 from './utils/getWeb3'
 import './css/oswald.css'
@@ -86,7 +86,8 @@ class App extends Component {
     const contract = require('truffle-contract')
     const canvas = contract(CanvasContract)
     canvas.setProvider(this.state.web3.currentProvider)
-
+    // InkTokenContract.setProvider(this.state.web3.currentProvider)
+    // Crowdsale.setProvider(this.state.web3.currentProvider)
     this.state.web3.eth.getAccounts( async (error, accounts) => {
       const instance = await canvas.deployed()
       this.setState({canvasInstance: instance, currentUser: accounts[0]})
