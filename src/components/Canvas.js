@@ -6,6 +6,7 @@ import '../utils/Animate'
 import Scroller from '../utils/Scroller'
 import Tiling from '../utils/Tiling'
 import * as enc from '../helpers/encript'
+import axios from 'axios'
 
 
 var otherAddress = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"
@@ -35,13 +36,16 @@ class Canvas extends PureComponent {
         this.reflow()
     }
     tfer(){
-        console.log(this.props.currentUser)
-        // or sending and using a promise
-        this.props.canvasInstance.methods.myMethod(otherAddress, 9000000000000000).send({from: this.props.currentUser})
-        .then(function(receipt){
-            console.log('done now', receipt)
-            // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
-        });
+        // console.log(this.props.currentUser)
+        // // or sending and using a promise
+        // this.props.canvasInstance.methods.myMethod(otherAddress, 9000000000000000).send({from: this.props.currentUser})
+        // .then(function(receipt){
+        //     console.log('done now', receipt)
+        //     // receipt can also be a new contract instance, when coming from a "contract.deploy({...}).send()"
+        // });
+        axios.get('/ping').then((data)=>{
+            console.log('XYXYYX', data)
+        })
     }
   
     saveDrawing(options){
