@@ -20,7 +20,7 @@ contract Canvas {
 
 
     function drawString(string data) public returns (bool success) {
-        tokenInstance.burn(100);
+        // tokenInstance.burn(100);
         canvasString = data;
         return true;
       }
