@@ -60,7 +60,7 @@ contract('Crowdsale', function(accounts) {
 
     // draw on canvas
     const canvas = await CanvasToken.deployed()
-    await canvas.drawString('bull', {from: otherAddress,  gas: 5200000})
+    await canvas.drawString('bull', {from: otherAddress})
     // get vars
     const string = await canvas.getCanvasString.call()
     var newTokenBalance = await instance.getBalance.call(otherAddress)
