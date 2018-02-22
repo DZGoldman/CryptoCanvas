@@ -13,15 +13,48 @@ module.exports = function(deployer, network, accounts) {
   var otherAddress = accounts[0]
   deployer.deploy(SimpleStorage);
   
-  deployer.deploy(Canvas);
+  // deployer.deploy(Canvas);
   deployer.deploy(InkToken, 90000, 'InkToken', 'Ink', {from: fromAddress}).then(function() {
     console.log('***** DEPLOYING DEPENDENT CONTRACTS',InkToken.address )
     deployer.deploy(Crowdsale, fromAddress, 50000, 525600, 2, InkToken.address).then(async function() {
       var i = await InkToken.deployed()
-      i.transfer(Crowdsale.address, 40000, {from: fromAddress})
+      await i.transfer(Crowdsale.address, 40000, {from: fromAddress})
     })
-    return deployer.deploy(Canvas, InkToken.address);
+      return deployer.deploy(Canvas, InkToken.address).then(async function(){
+        var i = await InkToken.deployed()
+        await  i.approve(Canvas.address, 10000)
+      })
   });
 
 };
 
+// var SimpleStorage = artifacts.require("./SimpleStorage.sol");
+// var InkToken = artifacts.require("./InkToken.sol");
+// var Crowdsale = artifacts.require("./CrowdSale.sol");
+// var Canvas = artifacts.require("Canvas");
+// var Crowdsale = artifacts.require("CrowdSale");
+// var SimpleStorage = artifacts.require("SimpleStorage");
+// var InkToken = artifacts.require("InkToken");
+
+
+// // NOTE: network argument can be used for different deployments in different environments
+// module.exports = function(deployer, network, accounts) {
+//   var fromAddress =  accounts[1]
+//   var otherAddress = accounts[0]
+//   deployer.deploy(SimpleStorage);
+  
+//   deployer.deploy(InkToken, 90000, 'InkToken', 'Ink', {from: fromAddress}).then(function() {
+//     console.log('***** DEPLOYING DEPENDENT CONTRACTS',InkToken.address )
+//     deployer.deploy(Crowdsale, fromAddress, 50000, 525600, 2, InkToken.address).then(async function() {
+//       var i = await InkToken.deployed()
+//       await deployer.deploy(Canvas, InkToken.address);
+//       var c = await Canvas.deployed()
+//       await i.transfer(Crowdsale.address, 40000, {from: fromAddress})
+//       await  i.approve(Canvas.address, 10000)
+//     })
+//     return
+//   });
+
+// };
+
+// 

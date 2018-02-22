@@ -5,7 +5,7 @@ var Crowdsale = artifacts.require("./CrowdSale.sol");
 
 var scale = (10**18)
 var balance;
-
+// TODO: ensure state reset between tests (eth balances)
 contract('InkToken', function(accounts) {
   var fromAddress =  accounts[1]
   var otherAddress = accounts[0]
@@ -17,7 +17,7 @@ contract('InkToken', function(accounts) {
     // balance and supply arent' equal beacuse some is sent to crowdsale
     // assert.equal(balance.valueOf(), supply, "initial supply");
     
-    
+
     await instance.burn(80000*scale, {from: fromAddress })
     balance = await instance.getBalance.call(fromAddress)
     assert.equal(balance.valueOf(), 10000*scale, "burn works");
@@ -39,7 +39,7 @@ contract('Crowdsale', function(accounts) {
     // initial vars/consts
     var price =   await crowdsale.price.call()
     price = price.valueOf()
-    var amountEthToSend = web3.toWei(2, "ether")
+    var amountEthToSend = web3.toWei(6, "ether")
     var balancePre = await  web3.eth.getBalance(otherAddress);
     balancePre = balancePre.valueOf()
 
@@ -55,33 +55,23 @@ contract('Crowdsale', function(accounts) {
 
     assert.equal(balancePre > balancePost, true, 'eth sent')
     assert.equal(raised.valueOf(), amountEthToSend, "eth added to fundraising stash");
+    console.log('TOKENS BEFORE DRAW', tokenBalance)
     assert.equal(tokenBalance, amountEthToSend/price, "right # of tokens awarded");
 
-  
+    // draw on canvas
+    const canvas = await CanvasToken.deployed()
+    await canvas.drawString('bull', {from: otherAddress,  gas: 5200000})
+    // get vars
+    const string = await canvas.getCanvasString.call()
+    var newTokenBalance = await instance.getBalance.call(otherAddress)
+    newTokenBalance = newTokenBalance.valueOf()
+    console.log('TOKENS after DRAW', newTokenBalance)
+
+    assert.equal(string.valueOf(), 'bull', "draw works");
+    assert.equal(tokenBalance > newTokenBalance, true, 'tokens burned')
+
+
   });
 });
 
 
-
-
-
-
-
-// contract('Canvas', function(accounts) {
-//     var fromAddress =  accounts[1]
-//   var otherAddress = accounts[0]
-//   it("...basic things.",async  function() {
-
-//     const instance = await InkToken.deployed();
-
-//      const canvas = await CanvasToken.deployed()
-//          balance = await instance.getBalance.call(fromAddress)
-//       console.log('pre', balance.valueOf())
-//       await canvas.drawString('bull', {from: fromAddress,  gas: 5200000})
-//       console.log('post', balance.valueOf())
-
-//       const string = await canvas.getCanvasString.call()
-//       assert.equal(string.valueOf(), 'bull', "transfer works");
-
-//     });
-//   })
