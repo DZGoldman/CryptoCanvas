@@ -47,6 +47,7 @@ contract Crowdsale {
         uint amount = msg.value;
         balanceOf[msg.sender] += amount;
         amountRaised += amount;
+        // this line is causing the error
         tokenReward.transfer(msg.sender, amount / price);
         FundTransfer(msg.sender, amount, true);
     }
