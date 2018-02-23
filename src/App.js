@@ -11,6 +11,8 @@ import './css/pure-min.css'
 import './App.css'
 import './css/ui.css'
 import CanvasContainer from './components/CanvasContainer.js'
+import Balances from './components/Balances.js'
+
 import autoBind from 'react-autobind';
 
 class App extends Component {
@@ -39,7 +41,9 @@ class App extends Component {
 
       // Instantiate contract once web3 provided.
       // this.instantiateContract()
-      this.instantiateInkToken()
+      this.instantiateCanvas()
+      this.instantiateCrowdSale()
+      this.instantiateToken()
     })
     .catch(() => {
       console.log('Error finding web3.')
@@ -82,15 +86,37 @@ class App extends Component {
     })
   }
 
-  instantiateInkToken(){
+  instantiateCanvas(){
     const contract = require('truffle-contract')
+
     const canvas = contract(CanvasContract)
     canvas.setProvider(this.state.web3.currentProvider)
-    // InkTokenContract.setProvider(this.state.web3.currentProvider)
-    // Crowdsale.setProvider(this.state.web3.currentProvider)
+
     this.state.web3.eth.getAccounts( async (error, accounts) => {
       const instance = await canvas.deployed()
       this.setState({canvasInstance: instance, currentUser: accounts[0]})
+    })
+  }
+  instantiateCrowdSale(){
+    const contract = require('truffle-contract')
+    const crowdSale = contract(Crowdsale)
+    crowdSale.setProvider(this.state.web3.currentProvider)
+
+    this.state.web3.eth.getAccounts( async (error, accounts) => {
+    crowdSale.setProvider(this.state.web3.currentProvider)
+    const instance = await crowdSale.deployed()
+      this.setState({crowdsaleInstance: instance, currentUser: accounts[0]})
+    })
+  }
+  instantiateToken(){
+    const contract = require('truffle-contract')
+    const token = contract(InkTokenContract)
+    token.setProvider(this.state.web3.currentProvider)
+ 
+    this.state.web3.eth.getAccounts( async (error, accounts) => {
+      token.setProvider(this.state.web3.currentProvider)
+    const instance = await token.deployed()
+      this.setState({tokenInstance: instance, currentUser: accounts[0]})
     })
   }
 
@@ -112,6 +138,12 @@ class App extends Component {
               <p>The stored value is: {this.state.storageValue}</p>
             </div>
           </div>
+          <Balances
+            crowdsaleInstance={this.state.crowdsaleInstance}
+            currentUser={this.state.currentUser}
+            web3={this.state.web3}
+            tokenInstance={this.state.tokenInstance}
+          />
           <CanvasContainer
             canvasInstance={this.state.canvasInstance}
             currentUser={this.state.currentUser}
