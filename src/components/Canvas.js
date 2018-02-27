@@ -9,33 +9,33 @@ import * as enc from '../helpers/encript'
 import axios from 'axios'
 
 
-var otherAddress = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"
 
 window.paintCount = 0
 class Canvas extends PureComponent {
     constructor(props) {
-    super(props)
-
+        super(props)
+        
         Object.assign(this,{
             contentWidth:  1000,
             cellWidth: 10,
             clientWidth: 0,
             newCellHash: {}
-            })
+        })
         this.canvasWidth = this.contentWidth/this.cellWidth
-         autoBind(this);
-         this.state = {
-             surfaceArea:{
-                 area: 'n/a',
-                 topLeft: 'n/a'
-             }
-         }
-     }
+        autoBind(this);
+        this.state = {
+            surfaceArea:{
+                area: 'n/a',
+                topLeft: 'n/a'
+            }
+        }
+    }
     clear(e){
         this.newCellHash = {}
         this.reflow()
     }
     tfer(){
+        // var otherAddress = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"
         // console.log(this.props.currentUser)
         // // or sending and using a promise
         // this.props.canvasInstance.methods.myMethod(otherAddress, 9000000000000000).send({from: this.props.currentUser})
@@ -244,8 +244,8 @@ class Canvas extends PureComponent {
         const width = contentWidth / cellWidth;
         
         this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
-            // return Math.random() > 0.5 ? 0: 1
-            return i % 2 
+            return Math.random() > 0.5 ? 0: 1
+            // return i % 2 
         })
 
     }

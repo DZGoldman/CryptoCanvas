@@ -17,7 +17,7 @@ class App extends Component {
 // lazy solution: TODO: listener for changes? meh...
     window.setInterval(()=>{
       this.updateBalances()
-    }, 2500)
+    }, 5000)
   }
   buyInkTokens(){
     const valueInEth = this.numInput.value
