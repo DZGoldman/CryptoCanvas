@@ -171,12 +171,13 @@ setColor(currentColor){
         canvasInstance={this.props.canvasInstance}
         currentUser ={this.props.currentUser}
       />
-      <div onClick={this.test}>test</div>
-      <div onClick={this.test2}>test2</div>
-      <div>size{this.state.pixelSize}</div>
+ 
       </div>
     );
   }
 }
 
 export default CanvasContainer
+/* <div onClick={this.test}>test</div>
+<div onClick={this.test2}>test2</div>
+<div>size{this.state.pixelSize}</div> */

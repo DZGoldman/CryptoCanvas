@@ -17,11 +17,10 @@ contract Canvas {
     ) {
         tokenInstance = token(addressOfToken);
     }
-
-
     function drawString(string data) public returns (bool success) {
         tokenInstance.burnFrom(msg.sender, 1);
         canvasString = data;
+        Draw(data);
         return true;
       }
         function getCanvasString() public returns (string canv) {

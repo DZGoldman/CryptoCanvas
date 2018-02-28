@@ -27,8 +27,24 @@ class Canvas extends PureComponent {
             surfaceArea:{
                 area: 'n/a',
                 topLeft: 'n/a'
-            }
+            },
+            allDrawingStrings: [] 
         }
+        window.getAllDrawings = this.getAllDrawings
+
+    }
+    getAllDrawings(){
+        this.props.canvasInstance.allEvents({}, { fromBlock: 0, toBlock: 'latest' }).get((error, eventResult) => {
+            if (error){
+
+                console.log('Error in myEvent event handler: ' + error);
+            }
+            else{
+                    
+                console.log('myEvent: ' + JSON.stringify(eventResult.args));
+                console.log(eventResult)
+            }
+          });
     }
     clear(e){
         this.newCellHash = {}
@@ -65,6 +81,7 @@ class Canvas extends PureComponent {
     applyDrawing(fullEncryptedStr){
         const {canvasWidth, initialCanvas} = this
         const [encryptionType, topLeft, area, encryptedData] = fullEncryptedStr.split('c');
+        // NOTE: encruptionType still has 0x. lack of bug is pure luck
         const decryptedStr = enc.leftRunDecrypt(encryptedData)
         const newCanvas = [...initialCanvas];
         const areaWidth = Math.sqrt(area);
@@ -80,19 +97,18 @@ class Canvas extends PureComponent {
             }
         }
         this.initialCanvas = newCanvas
+        this.reflow()
         return  newCanvas
     }
     putLatestOnCanvas(){
         this.getDrawing((fullEncryptedStr)=>{
             this.applyDrawing(fullEncryptedStr)
-            this.reflow()
         })
     }
     getDrawing(next){
             const {canvasInstance, currentUser} = this.props
         
             canvasInstance.getCanvasString.call({from: currentUser}).then((result)=>{
-
               next && !next.target && next(result)
             })
         }
@@ -249,6 +265,16 @@ class Canvas extends PureComponent {
         })
 
     }
+    addToDrawings(newDrawingString){
+        // for extra safty also keep track of a set? maybe? so no repeats?
+        const {allDrawingStrings} = this.state
+        if ( newDrawingString && newDrawingString != allDrawingStrings[allDrawingStrings.length - 1]){
+            const newDrawingsArray = allDrawingStrings.concat(newDrawingString)
+            this.setState({allDrawingStrings: newDrawingsArray})
+            console.log('all of my drawings!!', this.state.allDrawingStrings)
+        }
+
+    }
 
     componentDidMount(){
         var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
@@ -268,6 +294,7 @@ class Canvas extends PureComponent {
                     if (!error)
                         {
                             console.warn('SOMEBODY done drawn', result)
+                            this.addToDrawings(result.args.canvas)
                         } else {
                             console.log(error);
                         }
@@ -420,6 +447,21 @@ class Canvas extends PureComponent {
 
         // console.log(this.initialCanvas)
     }
+    play(indexx){
+        console.log('indexx1 log', indexx)
+        if (indexx == 0){
+            this.clear()
+        }
+        if (indexx < this.state.allDrawingStrings.length){
+            this.applyDrawing(this.state.allDrawingStrings[indexx])
+            console.log('indexx2log', indexx)
+
+            window.setTimeout(()=>{
+                console.log('indexx3log', indexx)
+                this.play(indexx +1 )
+            }, 2000)
+        }
+    }
 
   render() {
       console.log('rendering')
@@ -430,7 +472,12 @@ class Canvas extends PureComponent {
      
      <canvas ref={(content)=> this.content = content} id="content"></canvas>
     </div>
-    
+    <div>
+   {this.state.allDrawingStrings.map((drawingString)=>{
+       return <div onClick={()=>this.applyDrawing(drawingString)}>{drawingString}</div>
+   })}
+   <div onClick={()=>{this.play(0)}}> play</div>
+   </div>
     <div id="settings">
      <div><label for="scrollingX">ScrollingX: </label><input type="checkbox" id="scrollingX" checked/></div>
      <div><label for="scrollingY">ScrollingY: </label><input type="checkbox" id="scrollingY" checked/></div>

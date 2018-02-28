@@ -44,5 +44,6 @@ app.get('/ping',  (req, res) =>  {
 app.get('/',  (req, res)=> {
   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
-
-app.listen(process.env.PORT || 8080);
+// NOTE: Double check this when hosting 
+// app.listen(process.env.PORT || 8080);
+app.listen( process.env.NODE_ENV ? process.env.PORT : 8080);
