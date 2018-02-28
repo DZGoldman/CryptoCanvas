@@ -445,19 +445,15 @@ class Canvas extends PureComponent {
             }, false);
         }
 
-        // console.log(this.initialCanvas)
     }
     play(indexx){
-        console.log('indexx1 log', indexx)
         if (indexx == 0){
             this.clear()
         }
         if (indexx < this.state.allDrawingStrings.length){
             this.applyDrawing(this.state.allDrawingStrings[indexx])
-            console.log('indexx2log', indexx)
 
             window.setTimeout(()=>{
-                console.log('indexx3log', indexx)
                 this.play(indexx +1 )
             }, 2000)
         }
