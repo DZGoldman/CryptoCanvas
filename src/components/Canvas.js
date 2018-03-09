@@ -64,6 +64,7 @@ class Canvas extends PureComponent {
         })
     }
   
+    // save current cavas to blockchain
     saveDrawing(options){
     
         const newNumStr = this.newCellsToNumStr();
@@ -78,33 +79,43 @@ class Canvas extends PureComponent {
              this.getDrawing()
          })
     }
-    applyDrawing(fullEncryptedStr){
-        const {canvasWidth, initialCanvas} = this
+
+    applyDrawingToBase(fullEncryptedStr, baseStringDecrypted){
+        const {canvasWidth} = this
         const [encryptionType, topLeft, area, encryptedData] = fullEncryptedStr.split('c');
         // NOTE: encruptionType still has 0x. lack of bug is pure luck
         const decryptedStr = enc.leftRunDecrypt(encryptedData)
-        const newCanvas = [...initialCanvas];
+        const newCanvas = [...baseStringDecrypted];
         const areaWidth = Math.sqrt(area);
 
         const skipLength = canvasWidth - areaWidth;
 
         var currentCanvasIndex, newCellValue;
-        for (var i = 0; i < +area; i ++){
+        for (var i = 0; i < +area; i ++) {
             currentCanvasIndex = +topLeft + i + (skipLength * Math.floor(i/areaWidth));
             newCellValue = +decryptedStr[i];
             if (newCellValue != 9){
                 newCanvas[currentCanvasIndex] = newCellValue
             }
         }
+        return newCanvas
+    }
+    // inputs encrypted string, applys it to initial cavnas, reflows
+    applyDrawing(fullEncryptedStr){
+
+        const baseStringDecrypted = this.initialCanvas
+        const newCanvas = this.applyDrawingToBase(fullEncryptedStr, baseStringDecrypted)
         this.initialCanvas = newCanvas
         this.reflow()
-        return  newCanvas
+        // return  newCanvas
     }
+    // get last drawin and apply it to cavas
     putLatestOnCanvas(){
         this.getDrawing((fullEncryptedStr)=>{
             this.applyDrawing(fullEncryptedStr)
         })
     }
+    // get latest drawing
     getDrawing(next){
             const {canvasInstance, currentUser} = this.props
         
@@ -281,27 +292,30 @@ class Canvas extends PureComponent {
         // Settings
         this.setInitialCanvas()
 
+        const attemptSetEventListener = ()=> {
 
-        var done = false
-        window.setInterval(()=>{
-
-            if (!done && this.props.canvasInstance){
-                console.log('SETTING EVENT')
-                done = true;
-                const drawEvent = this.props.canvasInstance.allEvents(({}, {fromBlock: 0, toBlock: 'latest'}))
-                console.log(drawEvent)
-                drawEvent.watch((error, result)=>{
-                    if (!error)
+            window.setTimeout(()=>{
+                
+                if (this.props.canvasInstance){
+                    console.log('SETTING EVENT')
+                    const drawEvent = this.props.canvasInstance.allEvents(({}, {fromBlock: 0, toBlock: 'latest'}))
+                    console.log(drawEvent)
+                    drawEvent.watch((error, result)=>{
+                        if (!error)
                         {
                             console.warn('SOMEBODY done drawn', result)
                             this.addToDrawings(result.args.canvas)
                         } else {
                             console.log(error);
                         }
-                });
-            }
-
-        }, 500)
+                    });
+                } else {
+                    attemptSetEventListener()
+                }
+                
+            }, 500)
+        }
+        attemptSetEventListener()
       
         content.addEventListener("mousedown", this.handleMouseDown, false); 
         var context = content.getContext('2d');
@@ -470,7 +484,9 @@ class Canvas extends PureComponent {
     </div>
     <div>
    {this.state.allDrawingStrings.map((drawingString)=>{
-       return <div onClick={()=>this.applyDrawing(drawingString)}>{drawingString}</div>
+       return <div 
+       key ={drawingString}
+       onClick={()=>this.applyDrawing(drawingString)}>{drawingString}</div>
    })}
    <div onClick={()=>{this.play(0)}}> play</div>
    </div>
