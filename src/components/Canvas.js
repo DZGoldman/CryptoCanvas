@@ -31,7 +31,7 @@ class Canvas extends PureComponent {
             allDrawingStrings: [] 
         }
         window.getAllDrawings = this.getAllDrawings
-
+        window.d = this.drawingStackToInitialCanvas
     }
     getAllDrawings(){
         this.props.canvasInstance.allEvents({}, { fromBlock: 0, toBlock: 'latest' }).get((error, eventResult) => {
@@ -284,6 +284,16 @@ class Canvas extends PureComponent {
             this.setState({allDrawingStrings: newDrawingsArray})
             console.log('all of my drawings!!', this.state.allDrawingStrings)
         }
+
+    }
+
+    drawingStackToInitialCanvas() {
+        var canvasSoFar = this.initialCanvas;
+        this.state.allDrawingStrings.forEach((drawingString)=>{
+            canvasSoFar = this.applyDrawingToBase(drawingString, canvasSoFar)
+        })
+        this.initialCanvas = canvasSoFar;
+        this.reflow()
 
     }
 
