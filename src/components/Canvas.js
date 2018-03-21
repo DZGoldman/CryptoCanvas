@@ -73,6 +73,16 @@ class Canvas extends PureComponent {
         const fullEncryptedStr = '1c' + topLeft + 'c' + area + 'c' + encryptedData
         const {width, pixelSize} = this.state
         const {canvasInstance, currentUser} = this.props
+        axios.post('http://localhost:8080/save', {
+            firstName: 'Fred',
+            lastName: 'Flintstone'
+        })
+        .then(function (response) {
+            console.log(response);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
         canvasInstance.drawString('0x' + fullEncryptedStr , {from: currentUser})
          .then( async (result) => {
       // Get the value from the contract to prove it worked.

@@ -9,7 +9,7 @@ const   Sequelize = require('sequelize');
 // sequelize = new Sequelize(process.env.HEROKU_POSTGRESQL_ONYX_URL|| process.env.DATABASE_URL
 const sequelize = new Sequelize( {
     dialect: 'postgres',
-    port: process.env.PORT || 5432,
+    port: process.env.PORT  || 5433,
     username: process.env.username,
     password: null,
     database: process.env.database
@@ -35,15 +35,25 @@ sequelize.sync().then(function() {
   }).catch(function() {
     console.log('table problems');
   })
-app.use(express.static(path.join(__dirname, 'build')));
+
+// root delivery inactive
+app.use(express.static(path.join(__dirname, 'build_webpack')));
 
 app.get('/ping',  (req, res) =>  {
- return res.send('pong');
+  console.log('ping pong test')
+ return res.json('pong');
+});
+
+app.post('/save',  (req, res) =>  {
+  const newDrawing = Drawing.build()
+
+
 });
 
 app.get('/',  (req, res)=> {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  console.log('DELIVERTING ROOT')
+  res.sendFile(path.join(__dirname, 'build_webpack', 'index.html'));
 });
 // NOTE: Double check this when hosting 
-// app.listen(process.env.PORT || 8080);
+// app.listen( 8080);
 app.listen( process.env.NODE_ENV ? process.env.PORT : 8080);
