@@ -7,7 +7,7 @@ import Scroller from '../utils/Scroller'
 import Tiling from '../utils/Tiling'
 import * as enc from '../helpers/encript'
 import axios from 'axios'
-
+import sha1 from 'sha1'
 
 
 window.paintCount = 0
@@ -31,7 +31,7 @@ class Canvas extends PureComponent {
             allDrawingStrings: [] 
         }
         window.getAllDrawings = this.getAllDrawings
-        window.d = this.drawingStackToInitialCanvas
+        window.d = this.drawingStackTocurrentCanvas
     }
     getAllDrawings(){
         this.props.canvasInstance.allEvents({}, { fromBlock: 0, toBlock: 'latest' }).get((error, eventResult) => {
@@ -73,20 +73,21 @@ class Canvas extends PureComponent {
         const fullEncryptedStr = '1c' + topLeft + 'c' + area + 'c' + encryptedData
         const {width, pixelSize} = this.state
         const {canvasInstance, currentUser} = this.props
-        axios.post('http://localhost:8080/save', {
-            firstName: 'Fred',
-            lastName: 'Flintstone'
-        })
-        .then(function (response) {
-            console.log(response);
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+      
         canvasInstance.drawString('0x' + fullEncryptedStr , {from: currentUser})
          .then( async (result) => {
       // Get the value from the contract to prove it worked.
              this.getDrawing()
+            //  axios.post('/save', {
+            //     firstName: 'Fred',
+            //     lastName: 'Flintstone'
+            // })
+            // .then(function (response) {
+            //     console.log(response);
+            // })
+            // .catch(function (error) {
+            //     console.log(error);
+            // });
          })
     }
 
@@ -113,9 +114,9 @@ class Canvas extends PureComponent {
     // inputs encrypted string, applys it to initial cavnas, reflows
     applyDrawing(fullEncryptedStr){
 
-        const baseStringDecrypted = this.initialCanvas
+        const baseStringDecrypted = this.currentCanvas
         const newCanvas = this.applyDrawingToBase(fullEncryptedStr, baseStringDecrypted)
-        this.initialCanvas = newCanvas
+        this.currentCanvas = newCanvas
         this.reflow()
         // return  newCanvas
     }
@@ -170,7 +171,7 @@ class Canvas extends PureComponent {
     }
     newCellsToNumStr(){
         const {topLeft, area} = this.state.surfaceArea;
-        const {canvasCoordinatesToIndex, canvasIndexToCoordinates, canvasWidth, initialCanvas,newCellHash} = this 
+        const {canvasCoordinatesToIndex, canvasIndexToCoordinates, canvasWidth, currentCanvas,newCellHash} = this 
         // const startingC = canvasIndexToCoordinates(topLeft);
         const areaWidth = Math.sqrt(area);
         var currentIndex;
@@ -191,18 +192,18 @@ class Canvas extends PureComponent {
     }
 
     handleMouseDown(e) {
-        const {getPixelSelected, newCellHash, initialCanvas, canvasWidth} = this;
+        const {getPixelSelected, newCellHash, currentCanvas, canvasWidth} = this;
         const currentColor = this.props.currentColor
         const pixel =getPixelSelected(e);
         const coordinateStr = `${pixel['x']},${pixel['y']}`
         const colorInHash  = newCellHash[coordinateStr];
-        const colorInInitialCanvas = initialCanvas[ pixel['x'] + (canvasWidth*pixel['y'])]
+        const colorIncurrentCanvas = currentCanvas[ pixel['x'] + (canvasWidth*pixel['y'])]
 
         if (colorInHash == currentColor ) {
             delete newCellHash[coordinateStr] 
             this.setSurfaceArea(this.newCellSurfaceArea())
         }
-        else if (colorInInitialCanvas != currentColor || (colorInHash && colorInHash != currentColor)){
+        else if (colorIncurrentCanvas != currentColor || (colorInHash && colorInHash != currentColor)){
             newCellHash[coordinateStr] = currentColor
             this.setSurfaceArea(this.newCellSurfaceArea())
         }
@@ -222,13 +223,13 @@ class Canvas extends PureComponent {
         return pixel;
     }
     // getCurrentColor(pixel){
-    //     const { initialCanvas, contentWidth, cellWidth} = this
+    //     const { currentCanvas, contentWidth, cellWidth} = this
     //     const width = contentWidth / cellWidth
     //     console.log(pixel)
     //     const index =  pixel['y']*width + pixel['x']
     //     console.log(index)
 
-    //     return initialCanvas[index ]
+    //     return currentCanvas[index ]
     // }
 	// Cell Paint Logic
 	paint(col, row, left, top, width, height, zoom) {
@@ -236,7 +237,7 @@ class Canvas extends PureComponent {
         // if( window.paintCount % 10000 ==0){
         //     console.log( window.paintCount)
         // }
-        const {context, newCellHash, canvasWidth, initialCanvas} = this
+        const {context, newCellHash, canvasWidth, currentCanvas} = this
 
 
         // paint either a newly painted cell or from canvas state
@@ -244,7 +245,7 @@ class Canvas extends PureComponent {
 		if (newlyPaintedCell ){
 			context.fillStyle = newlyPaintedCell
 		} else {
-            context.fillStyle = enc.numToRbgaFull[initialCanvas[col* canvasWidth + row]]
+            context.fillStyle = enc.numToRbgaFull[currentCanvas[col* canvasWidth + row]]
             // context.fillStyle = getRandomColor()
                     // context.fillStyle = row%2 + col%2 > 0 ? enc.numToRbgaFull[0] :  enc.numToRbgaFull[1];
         // context.fillStyle = Math.random() > 0.1 ? "#ddd" : "red";
@@ -276,11 +277,11 @@ class Canvas extends PureComponent {
         this.clientWidth = container.clientWidth;
         scroller.setDimensions(this.clientWidth, this.clientWidth, contentWidth, contentWidth);
     };
-    setInitialCanvas(){
+    setcurrentCanvas(){
         const {contentWidth, cellWidth} = this
         const width = contentWidth / cellWidth;
         
-        this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
+        this.currentCanvas = this.initialCanvas = [...Array(width*width)].map((_, i)=>{ 
             return Math.random() > 0.5 ? 0: 1
             // return i % 2 
         })
@@ -294,15 +295,21 @@ class Canvas extends PureComponent {
             this.setState({allDrawingStrings: newDrawingsArray})
             console.log('all of my drawings!!', this.state.allDrawingStrings)
         }
+        this.currentCanvas = this.applyDrawingToBase(newDrawingString, this.currentCanvas)
+        this.reflow()
 
     }
-
-    drawingStackToInitialCanvas() {
-        var canvasSoFar = this.initialCanvas;
-        this.state.allDrawingStrings.forEach((drawingString)=>{
+    // 0 to count, or defaults to all
+    drawingStackTocurrentCanvas(count) {
+        var drawingStack = this.state.allDrawingStrings
+        if (count){
+            drawingStack = drawingStack.slice(0, count)
+        }
+        var canvasSoFar = this.currentCanvas;
+        drawingStack.forEach((drawingString)=>{
             canvasSoFar = this.applyDrawingToBase(drawingString, canvasSoFar)
         })
-        this.initialCanvas = canvasSoFar;
+        this.currentCanvas = canvasSoFar;
         this.reflow()
 
     }
@@ -310,7 +317,7 @@ class Canvas extends PureComponent {
     componentDidMount(){
         var {contentWidth, cellWidth, newCellHash, content, container, paint} = this
         // Settings
-        this.setInitialCanvas()
+        this.setcurrentCanvas()
 
         const attemptSetEventListener = ()=> {
 
@@ -503,10 +510,15 @@ class Canvas extends PureComponent {
      <canvas ref={(content)=> this.content = content} id="content"></canvas>
     </div>
     <div>
-   {this.state.allDrawingStrings.map((drawingString)=>{
+   {this.state.allDrawingStrings.map((drawingString, index)=>{
        return <div 
        key ={drawingString}
-       onClick={()=>this.applyDrawing(drawingString)}>{drawingString}</div>
+       onClick={()=>{
+        this.currentCanvas = this.initialCanvas
+        this.reflow()
+        this.drawingStackTocurrentCanvas(index + 1);
+       }
+    }>{drawingString}</div>
    })}
    <div onClick={()=>{this.play(0)}}> play</div>
    </div>
