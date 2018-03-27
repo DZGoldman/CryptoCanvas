@@ -70,14 +70,18 @@ class Canvas extends PureComponent {
         const newNumStr = this.newCellsToNumStr();
         const {area, topLeft} = this.state.surfaceArea;
         const encryptedData = enc.leftRun(newNumStr)
-        const fullEncryptedStr = '1c' + topLeft + 'c' + area + 'c' + encryptedData
+        const fullEncryptedStr = '0x' + '1c' + topLeft + 'c' + area + 'c' + encryptedData
         const {width, pixelSize} = this.state
         const {canvasInstance, currentUser} = this.props
       
-        canvasInstance.drawString('0x' + fullEncryptedStr , {from: currentUser})
+        canvasInstance.drawString(fullEncryptedStr , {from: currentUser})
          .then( async (result) => {
       // Get the value from the contract to prove it worked.
+      console.log(result)
              this.getDrawing()
+             this.applyDrawing(fullEncryptedStr)
+             this.addToDrawings(fullEncryptedStr)
+             this.clear()
             //  axios.post('/save', {
             //     firstName: 'Fred',
             //     lastName: 'Flintstone'
@@ -111,7 +115,7 @@ class Canvas extends PureComponent {
         }
         return newCanvas
     }
-    // inputs encrypted string, applys it to initial cavnas, reflows
+    // inputs encrypted string, applys it to current cavnas, reflows
     applyDrawing(fullEncryptedStr){
 
         const baseStringDecrypted = this.currentCanvas
@@ -488,15 +492,20 @@ class Canvas extends PureComponent {
 
     }
     play(indexx){
-        if (indexx == 0){
+        if (indexx == undefined){
             this.clear()
+            this.currentCanvas = this.initialCanvas
+            this.reflow()
+            window.setTimeout(()=>{
+                this.play(0)
+            }, 500)
         }
-        if (indexx < this.state.allDrawingStrings.length){
+        else if (indexx < this.state.allDrawingStrings.length){
             this.applyDrawing(this.state.allDrawingStrings[indexx])
 
             window.setTimeout(()=>{
                 this.play(indexx +1 )
-            }, 2000)
+            }, 500)
         }
     }
 
@@ -520,7 +529,7 @@ class Canvas extends PureComponent {
        }
     }>{drawingString}</div>
    })}
-   <div onClick={()=>{this.play(0)}}> play</div>
+   <div onClick={()=> this.play()}> play</div>
    </div>
     <div id="settings">
      <div><label for="scrollingX">ScrollingX: </label><input type="checkbox" id="scrollingX" checked/></div>
