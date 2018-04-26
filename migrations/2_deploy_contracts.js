@@ -5,14 +5,14 @@ var Canvas = artifacts.require("Canvas");
 var Crowdsale = artifacts.require("CrowdSale");
 var SimpleStorage = artifacts.require("SimpleStorage");
 var InkToken = artifacts.require("InkToken");
-
+var Plot = artifacts.require("Plot");
 
 // NOTE: network argument can be used for different deployments in different environments
 module.exports = function(deployer, network, accounts) {
   var fromAddress =  accounts[1]
   var otherAddress = accounts[0]
   deployer.deploy(SimpleStorage);
-  
+  deployer.deploy(Plot, {from: fromAddress});
   deployer.deploy(InkToken, 90000, 'InkToken', 'Ink', {from: fromAddress}).then(function() {
     deployer.deploy(Crowdsale, fromAddress, 50000, 525600, 2, InkToken.address).then(async function() {
       var i = await InkToken.deployed()

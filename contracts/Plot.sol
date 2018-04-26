@@ -4,9 +4,10 @@ contract Plot {
     // Map plot index to owner  
     address[900] public plotOwners; 
     // index to is on sale (boolean)  
-    bool[900] public plotIsForSale;   
+    bool[900] public plotStatuses;   
     // index to price
     uint256[900] public plotPrices;   
+    uint256 public startingPrice = 5;
 
     uint256 public feeRatio = 20;
 
@@ -20,29 +21,42 @@ contract Plot {
     event PlotBought(uint256 index, address newOwner);
 
 
-     function Plot(
-        address owner
-    ) {
-        address admin = owner;
+     function Plot()
+        public {
+        admin = msg.sender;
+        uint256[900] initialPrices;
+        // for (var index = 0; index < plotPrices.length; index++) {
+        //     initialPrices[index] = startingPrice;
+        // }
+        plotPrices = initialPrices;
     }
 
     // represent canvas?
 
-    // todo: instantiate with origin address
 
     function getPlotOwners() public returns (address[900] owners) {
-         return plotOwners;   
-     }
+        return plotOwners;   
+    }
+    function getPlotStatuses() public returns (bool[900] statuses) {
+        return plotStatuses;   
+    }
+    function getPlotPrices() public returns (uint256[900] prices) {
+        return plotPrices;   
+    }
+    function getAdmin() public returns (address adm){
+        return admin;
+    }
 
     function senderOwnsPlot(uint256 index) returns (bool ownsPlot){
         //  check if sender exists?
-         return msg.sender == plotOwners[index];
+        // return msg.sender == admin;
+        return msg.sender == plotOwners[index] || (msg.sender == admin && plotOwners[index] == address(0));
      }
 
     function setPlotStatus(uint256 index, bool newStatus) returns (bool newValue){
         require(senderOwnsPlot(index));
-        require(newStatus != plotIsForSale[index]);
-        plotIsForSale[index] = newStatus;
+        require(newStatus != plotStatuses[index]);
+        plotStatuses[index] = newStatus;
         PlotStatusSet(index, newStatus);
         return newStatus;
      }
@@ -61,16 +75,18 @@ contract Plot {
         return newPrice;
      }
 
-     function buyPlot(uint256 index, uint256 funds) returns (uint256 plotIndex){
+     function buyPlot(uint256 index) payable returns (uint256 plotIndex){
         require(!senderOwnsPlot(index));
-        require(plotIsForSale[index]);
+        require(plotStatuses[index]);
         uint256 price = plotPrices[index];
         uint256 fee = price / feeRatio;
-        require(funds > price + fee);
+
         // require user has enough funds
+        // require(funds > (price + fee));
         //  require(message.sender.balance >= totalPrice)
+
         address oldOwner = plotOwners[index];
-        // check if unowned
+        // // check if unowned
         if (oldOwner == address(0)){
             // set admin as owner
             oldOwner = admin;
@@ -79,10 +95,11 @@ contract Plot {
             admin.transfer(fee);
         }
         oldOwner.transfer(price);
-        //  update owndership
+        // //  update owndership
         plotOwners[index] = msg.sender;
-        // set not for sale
+        // // set not for sale
         setPlotStatus(index, false);
+
         PlotBought(index, msg.sender);
         return plotIndex;
      }
